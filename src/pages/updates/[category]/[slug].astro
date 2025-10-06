@@ -1,0 +1,348 @@
+---
+import Layout from '../../../components/Layout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const updates = await getCollection('updates');
+  return updates.map(update => {
+    // Extract just the filename without the category folder
+    const slug = update.slug.split('/').pop() || update.slug;
+    return {
+      params: { 
+        category: update.data.category, 
+        slug: slug
+      },
+      props: { update },
+    };
+  });
+}
+
+const { update } = Astro.props;
+const { Content } = await update.render();
+
+const formattedDate = update.data.date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+
+const categoryNames = {
+  'plasma-hardware': 'Plasma Hardware & Design',
+  'saltwater-dynamics': 'Saltwater & Plasma Dynamics',
+  'reactive-species': 'Reactive Species in Saltwater'
+};
+
+const statusColors = {
+  'in-progress': '#4a9eff',
+  'completed': '#22c55e',
+  'blocked': '#ef4444',
+  'paused': '#f59e0b'
+};
+
+const statusEmoji = {
+  'in-progress': '🔧',
+  'completed': '✓',
+  'blocked': '⚠',
+  'paused': '⏸'
+};
+---
+
+<Layout title={`${update.data.title} - Workspace by Ali`} description={update.data.summary}>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="/">Workspace</a>
+      <span>/</span>
+      <a href={`/updates/${update.data.category}`}>
+        {categoryNames[update.data.category as keyof typeof categoryNames]}
+      </a>
+      <span>/</span>
+      <span>{update.data.title}</span>
+    </nav>
+
+    <article class="update">
+      <header>
+        <div class="meta">
+          <time>{formattedDate}</time>
+          {update.data.status && (
+            <span 
+              class="status" 
+              style={`background: ${statusColors[update.data.status as keyof typeof statusColors]}20; color: ${statusColors[update.data.status as keyof typeof statusColors]}`}
+            >
+              <span class="emoji">{statusEmoji[update.data.status as keyof typeof statusEmoji]}</span>
+              {update.data.status}
+            </span>
+          )}
+        </div>
+        <h1>{update.data.title}</h1>
+        <p class="summary">{update.data.summary}</p>
+        {update.data.tags && update.data.tags.length > 0 && (
+          <div class="tags">
+            {update.data.tags.map(tag => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+        )}
+      </header>
+
+      {update.data.videoUrl && (
+        <div class="video-embed">
+          <iframe
+            src={update.data.videoUrl.replace('youtu.be/', 'youtube.com/embed/').replace('watch?v=', 'embed/')}
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>
+      )}
+
+      <div class="content">
+        <Content />
+      </div>
+
+      <footer class="update-footer">
+        <a href="/" class="back-link">← Back to workspace</a>
+      </footer>
+    </article>
+  </div>
+</Layout>
+
+<style>
+  .breadcrumb {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 3rem;
+    font-size: 0.85rem;
+    color: #555;
+  }
+
+  .breadcrumb a {
+    color: #888;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .breadcrumb a:hover {
+    color: #4a9eff;
+  }
+
+  .update {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 4rem;
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  time {
+    color: #666;
+    font-size: 0.85rem;
+  }
+
+  .status {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .emoji {
+    font-size: 0.85rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 500;
+    margin: 0 0 1.25rem 0;
+    color: #fff;
+    line-height: 1.25;
+    letter-spacing: -0.03em;
+  }
+
+  .summary {
+    font-size: 1.15rem;
+    color: #888;
+    margin: 0 0 2rem 0;
+    line-height: 1.7;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .tag {
+    background: #131313;
+    border: 1px solid #252525;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: #888;
+  }
+
+  .video-embed {
+    margin: 3rem 0;
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #000;
+    border: 1px solid #252525;
+  }
+
+  .video-embed iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .content {
+    color: #bbb;
+    line-height: 1.8;
+    font-size: 1.05rem;
+  }
+
+  .content :global(h2) {
+    color: #fff;
+    margin-top: 3.5rem;
+    margin-bottom: 1.25rem;
+    font-size: 1.75rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .content :global(h3) {
+    color: #fff;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.35rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .content :global(p) {
+    margin-bottom: 1.5rem;
+  }
+
+  .content :global(ul),
+  .content :global(ol) {
+    margin-bottom: 1.5rem;
+    padding-left: 1.75rem;
+  }
+
+  .content :global(li) {
+    margin-bottom: 0.75rem;
+  }
+
+  .content :global(code) {
+    background: #131313;
+    border: 1px solid #252525;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #e0e0e0;
+    font-family: 'Courier New', monospace;
+  }
+
+  .content :global(pre) {
+    background: #131313;
+    border: 1px solid #252525;
+    padding: 1.5rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+  }
+
+  .content :global(pre code) {
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  .content :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border: 1px solid #252525;
+  }
+
+  .content :global(blockquote) {
+    border-left: 3px solid #4a9eff;
+    padding-left: 2rem;
+    margin: 2rem 0;
+    color: #888;
+    font-style: italic;
+  }
+
+  .content :global(a) {
+    color: #4a9eff;
+    text-decoration: none;
+  }
+
+  .content :global(a:hover) {
+    text-decoration: underline;
+  }
+
+  .content :global(video) {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border: 1px solid #252525;
+  }
+
+  .update-footer {
+    margin-top: 5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid #252525;
+  }
+
+  .back-link {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.3s ease;
+  }
+
+  .back-link:hover {
+    color: #4a9eff;
+  }
+
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem;
+    }
+
+    .summary {
+      font-size: 1.05rem;
+    }
+
+    .content {
+      font-size: 1rem;
+    }
+
+    .content :global(h2) {
+      font-size: 1.5rem;
+    }
+
+    .content :global(h3) {
+      font-size: 1.25rem;
+    }
+  }
+</style>

@@ -1,5 +1,7 @@
-// @ts-check
 import { defineConfig } from 'astro/config';
 
-// https://astro.build/config
-export default defineConfig({});
+// Update YOUR-USERNAME with your GitHub username when deploying
+export default defineConfig({
+  site: 'https://writingsbyali-hub.github.io',
+  base: '/workspace-by-ali',
+});

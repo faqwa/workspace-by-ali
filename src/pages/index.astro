@@ -1,11 +1,131 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import Layout from '../components/Layout.astro';
+import CategorySection from '../components/CategorySection.astro';
+import { getCollection } from 'astro:content';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// Get all updates and sort by date (newest first)
+const allUpdates = await getCollection('updates');
+const sortedUpdates = allUpdates.sort((a, b) => 
+  b.data.date.getTime() - a.data.date.getTime()
+);
+
+// Group by category
+const plasmaHardware = sortedUpdates.filter(u => u.data.category === 'plasma-hardware');
+const saltwaterDynamics = sortedUpdates.filter(u => u.data.category === 'saltwater-dynamics');
+const reactiveSpecies = sortedUpdates.filter(u => u.data.category === 'reactive-species');
+
+// Get latest update date
+const latestUpdate = sortedUpdates[0]?.data.date;
+const formattedDate = latestUpdate?.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Workspace by Ali">
+  <div class="container">
+    <header class="hero">
+      <h1>What I'm Currently Working On</h1>
+      <p class="subtitle">
+        Live updates from active ArcUp plasma propulsion research.<br />
+        Raw experiments, failures, iterations, and progress.
+      </p>
+      {latestUpdate && (
+        <p class="last-updated">Last updated {formattedDate}</p>
+      )}
+    </header>
+
+    <div class="categories">
+      {plasmaHardware.length > 0 && (
+        <CategorySection
+          title="Plasma Hardware & Design"
+          description="Circuit design, CAD models, assembly, and hardware iteration"
+          updates={plasmaHardware}
+          category="plasma-hardware"
+        />
+      )}
+
+      {saltwaterDynamics.length > 0 && (
+        <CategorySection
+          title="Saltwater & Plasma Dynamics"
+          description="Molecular interactions, physics modeling, and theoretical work"
+          updates={saltwaterDynamics}
+          category="saltwater-dynamics"
+        />
+      )}
+
+      {reactiveSpecies.length > 0 && (
+        <CategorySection
+          title="Reactive Species in Saltwater"
+          description="Experimental data, reactions, measurements, and observations"
+          updates={reactiveSpecies}
+          category="reactive-species"
+        />
+      )}
+    </div>
+
+    {sortedUpdates.length === 0 && (
+      <div class="empty-state">
+        <p>No updates yet. The work begins soon.</p>
+      </div>
+    )}
+  </div>
 </Layout>
+
+<style>
+  .hero {
+    text-align: center;
+    margin-bottom: 6rem;
+    padding: 3rem 0 4rem 0;
+  }
+
+  h1 {
+    font-size: 2.75rem;
+    font-weight: 500;
+    margin: 0 0 1.5rem 0;
+    color: #fff;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+    color: #888;
+    max-width: 650px;
+    margin: 0 auto 2rem auto;
+    line-height: 1.7;
+  }
+
+  .last-updated {
+    color: #555;
+    font-size: 0.85rem;
+    margin: 0;
+  }
+
+  .categories {
+    margin-top: 4rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 6rem 2rem;
+    color: #555;
+    font-size: 1.05rem;
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding: 2rem 0 3rem 0;
+      margin-bottom: 4rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+    }
+  }
+</style>

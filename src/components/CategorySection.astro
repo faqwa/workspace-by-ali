@@ -1,0 +1,132 @@
+---
+import UpdateCard from './UpdateCard.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  updates: Array<{
+    data: {
+      title: string;
+      date: Date;
+      summary: string;
+      category: string;
+      status?: string;
+    };
+    slug: string;
+  }>;
+  category: string;
+}
+
+const { title, description, updates, category } = Astro.props;
+
+// Show only 3 most recent
+const visibleUpdates = updates.slice(0, 3);
+const hasMore = updates.length > 3;
+---
+
+<section class="category-section">
+  <div class="section-header">
+    <div>
+      <h2>{title}</h2>
+      <p class="description">{description}</p>
+    </div>
+    {hasMore && (
+      <a href={`/updates/${category}`} class="view-all">
+        View all {updates.length} →
+      </a>
+    )}
+  </div>
+
+  <div class="cards-container">
+    {visibleUpdates.map((update) => (
+      <UpdateCard
+        title={update.data.title}
+        date={update.data.date}
+        summary={update.data.summary}
+        category={update.data.category}
+        slug={update.slug}
+        status={update.data.status}
+      />
+    ))}
+  </div>
+</section>
+
+<style>
+  .category-section {
+    margin-bottom: 6rem;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #252525;
+  }
+
+  h2 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+
+  .description {
+    color: #888;
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .view-all {
+    color: #4a9eff;
+    text-decoration: none;
+    font-weight: 400;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    transition: color 0.3s ease;
+  }
+
+  .view-all:hover {
+    color: #6bb0ff;
+  }
+
+  .cards-container {
+    display: flex;
+    gap: 2rem;
+    overflow-x: auto;
+    padding-bottom: 1.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: #252525 transparent;
+  }
+
+  .cards-container::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .cards-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .cards-container::-webkit-scrollbar-thumb {
+    background: #252525;
+    border-radius: 3px;
+  }
+
+  .cards-container::-webkit-scrollbar-thumb:hover {
+    background: #353535;
+  }
+
+  @media (max-width: 768px) {
+    .section-header {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    h2 {
+      font-size: 1.35rem;
+    }
+  }
+</style>
