@@ -1,19 +1,18 @@
 {
   "name": "workspace-by-ali",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "new:update": "node scripts/new-update.mjs",
+    "format": "prettier --write \"src/**/*.{astro,ts,tsx,js,css,md}\""
+
   },
   "dependencies": {
-    "astro": "^4.15.0"
-  },
-  "devDependencies": {
-    "@astrojs/check": "^0.9.0",
-    "typescript": "^5.5.0"
+    "astro": "^5.14.1"
   }
 }

@@ -5,41 +5,42 @@ import { getCollection } from 'astro:content';
 export async function getStaticPaths() {
   const updates = await getCollection('updates');
   return updates.map(update => {
-    // Extract just the filename without the category folder
     const slug = update.slug.split('/').pop() || update.slug;
     return {
-      params: { 
-        category: update.data.category, 
-        slug: slug
+      params: {
+        category: update.data.category,
+        slug
       },
       props: { update },
     };
   });
 }
 
+type Status = 'in-progress' | 'completed' | 'blocked' | 'paused';
+
 const { update } = Astro.props;
 const { Content } = await update.render();
 
-const formattedDate = update.data.date.toLocaleDateString('en-US', {
+const formattedDate = update.data.date.toLocaleDateString('en-AU', {
   year: 'numeric',
   month: 'long',
   day: 'numeric'
 });
 
-const categoryNames = {
+const categoryNames: Record<string, string> = {
   'plasma-hardware': 'Plasma Hardware & Design',
   'saltwater-dynamics': 'Saltwater & Plasma Dynamics',
   'reactive-species': 'Reactive Species in Saltwater'
 };
 
-const statusColors = {
+const statusColors: Record<Status, string> = {
   'in-progress': '#4a9eff',
   'completed': '#22c55e',
   'blocked': '#ef4444',
   'paused': '#f59e0b'
 };
 
-const statusEmoji = {
+const statusEmoji: Record<Status, string> = {
   'in-progress': '🔧',
   'completed': '✓',
   'blocked': '⚠',
@@ -47,55 +48,60 @@ const statusEmoji = {
 };
 ---
 
-<Layout title={`${update.data.title} - Workspace by Ali`} description={update.data.summary}>
+<Layout
+  title={`${update.data.title} — Workspace by Ali`}
+  description={update.data.summary}
+  canonicalUrl={Astro.url.href}
+>
   <div class="container">
-    <nav class="breadcrumb">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
       <a href="/">Workspace</a>
-      <span>/</span>
+      <span aria-hidden="true">/</span>
       <a href={`/updates/${update.data.category}`}>
-        {categoryNames[update.data.category as keyof typeof categoryNames]}
+        {categoryNames[update.data.category] ?? update.data.category}
       </a>
-      <span>/</span>
-      <span>{update.data.title}</span>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{update.data.title}</span>
     </nav>
 
-    <article class="update">
+    <article class="update" itemscope itemtype="https://schema.org/Article">
       <header>
         <div class="meta">
-          <time>{formattedDate}</time>
+          <time datetime={update.data.date.toISOString()} itemprop="datePublished">{formattedDate}</time>
           {update.data.status && (
-            <span 
-              class="status" 
-              style={`background: ${statusColors[update.data.status as keyof typeof statusColors]}20; color: ${statusColors[update.data.status as keyof typeof statusColors]}`}
+            <span
+              class="status"
+              style={`--status:${statusColors[update.data.status as Status]}`}
             >
-              <span class="emoji">{statusEmoji[update.data.status as keyof typeof statusEmoji]}</span>
+              <span class="emoji">{statusEmoji[update.data.status as Status]}</span>
               {update.data.status}
             </span>
           )}
         </div>
-        <h1>{update.data.title}</h1>
-        <p class="summary">{update.data.summary}</p>
+        <h1 itemprop="headline">{update.data.title}</h1>
+        <p class="summary" itemprop="description">{update.data.summary}</p>
         {update.data.tags && update.data.tags.length > 0 && (
-          <div class="tags">
-            {update.data.tags.map(tag => (
-              <span class="tag">{tag}</span>
-            ))}
+          <div class="tags" aria-label="Tags">
+            {update.data.tags.map(tag => <span class="tag">{tag}</span>)}
           </div>
         )}
       </header>
 
       {update.data.videoUrl && (
-        <div class="video-embed">
+        <div class="video-embed" role="group" aria-label="Embedded video">
           <iframe
             src={update.data.videoUrl.replace('youtu.be/', 'youtube.com/embed/').replace('watch?v=', 'embed/')}
+            title="Update video"
+            loading="lazy"
             frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowfullscreen
           ></iframe>
         </div>
       )}
 
-      <div class="content">
+      <div class="content" itemprop="articleBody">
         <Content />
       </div>
 
@@ -107,242 +113,86 @@ const statusEmoji = {
 </Layout>
 
 <style>
-  .breadcrumb {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    margin-bottom: 3rem;
-    font-size: 0.85rem;
-    color: #555;
+  .breadcrumb{
+    display:flex; gap:.6rem; align-items:center; margin-bottom:2.5rem;
+    font-size:.9rem; color:var(--muted);
+  }
+  .breadcrumb a{ color:var(--text-4); text-decoration:none; }
+  .breadcrumb a:hover{ color:var(--brand); }
+
+  .update{ max-width: 760px; margin: 0 auto; }
+  header{ margin-bottom:3.25rem; }
+
+  .meta{
+    display:flex; align-items:center; gap:1rem; margin-bottom:1.25rem;
+  }
+  time{ color:var(--text-5); font-size:.9rem; }
+  .status{
+    font-size:.72rem; padding:.35rem .65rem; border-radius: var(--radius-sm);
+    font-weight:600; text-transform:capitalize; display:inline-flex; gap:.35rem; align-items:center;
+    background: color-mix(in oklab, var(--status) 15%, transparent); color: var(--status);
+    border: 1px solid color-mix(in oklab, var(--status) 35%, transparent);
+  }
+  .emoji{ font-size:.9rem; }
+
+  h1{
+    font-size:2.4rem; font-weight:700; margin:0 0 1rem; color:var(--text-1);
+    line-height:1.25; letter-spacing:-.02em;
+  }
+  .summary{ font-size:1.1rem; color:var(--text-4); margin:0 0 1.5rem; line-height:1.7; }
+
+  .tags{ display:flex; flex-wrap:wrap; gap:.6rem; }
+  .tag{
+    background:var(--elev-2); border:1px solid var(--border-2);
+    padding:.4rem .8rem; border-radius: var(--radius-sm); font-size:.8rem; color:var(--text-4);
   }
 
-  .breadcrumb a {
-    color: #888;
-    text-decoration: none;
-    transition: color 0.3s ease;
+  .video-embed{
+    margin:2rem 0; position:relative; padding-bottom:56.25%; height:0; overflow:hidden;
+    border-radius: var(--radius-md); background:#000; border:1px solid var(--border-2);
+  }
+  .video-embed iframe{
+    position:absolute; inset:0; width:100%; height:100%;
   }
 
-  .breadcrumb a:hover {
-    color: #4a9eff;
+  .content{ color:var(--text-3); line-height:1.85; font-size:1.05rem; }
+  .content :global(h2){
+    color:var(--text-1); margin:3rem 0 1rem; font-size:1.75rem; font-weight:700; letter-spacing:-.01em;
   }
-
-  .update {
-    max-width: 720px;
-    margin: 0 auto;
+  .content :global(h3){
+    color:var(--text-1); margin:2rem 0 .75rem; font-size:1.3rem; font-weight:700;
   }
-
-  header {
-    margin-bottom: 4rem;
+  .content :global(p){ margin:0 0 1.25rem; }
+  .content :global(ul), .content :global(ol){ margin:0 0 1.25rem; padding-left:1.5rem; }
+  .content :global(li){ margin:.5rem 0; }
+  .content :global(code){
+    background:var(--elev-2); border:1px solid var(--border-2);
+    padding:.2rem .45rem; border-radius:4px; font-size:.92em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   }
-
-  .meta {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    margin-bottom: 1.5rem;
+  .content :global(pre){
+    background:var(--elev-2); border:1px solid var(--border-2);
+    padding:1.2rem; border-radius:8px; overflow:auto; margin-bottom:1.25rem;
   }
-
-  time {
-    color: #666;
-    font-size: 0.85rem;
+  .content :global(img), .content :global(video){
+    max-width:100%; border-radius:8px; margin:1.75rem 0; border:1px solid var(--border-2);
   }
-
-  .status {
-    font-size: 0.7rem;
-    padding: 0.4rem 0.75rem;
-    border-radius: 6px;
-    font-weight: 500;
-    text-transform: capitalize;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
+  .content :global(blockquote){
+    border-left:3px solid var(--brand); padding-left:1.25rem; margin:1.75rem 0; color:var(--text-4); font-style:italic;
   }
+  .content :global(a){ color:var(--brand); text-decoration:none; }
+  .content :global(a:hover){ color:var(--brand-2); text-decoration:underline; }
 
-  .emoji {
-    font-size: 0.85rem;
+  .update-footer{
+    margin-top:4rem; padding-top:2rem; border-top:1px solid var(--border-2);
   }
+  .back-link{ color:var(--text-4); text-decoration:none; font-size:.95rem; }
+  .back-link:hover{ color:var(--brand); }
 
-  h1 {
-    font-size: 2.5rem;
-    font-weight: 500;
-    margin: 0 0 1.25rem 0;
-    color: #fff;
-    line-height: 1.25;
-    letter-spacing: -0.03em;
-  }
-
-  .summary {
-    font-size: 1.15rem;
-    color: #888;
-    margin: 0 0 2rem 0;
-    line-height: 1.7;
-  }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-  }
-
-  .tag {
-    background: #131313;
-    border: 1px solid #252525;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    color: #888;
-  }
-
-  .video-embed {
-    margin: 3rem 0;
-    position: relative;
-    padding-bottom: 56.25%;
-    height: 0;
-    overflow: hidden;
-    border-radius: 12px;
-    background: #000;
-    border: 1px solid #252525;
-  }
-
-  .video-embed iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .content {
-    color: #bbb;
-    line-height: 1.8;
-    font-size: 1.05rem;
-  }
-
-  .content :global(h2) {
-    color: #fff;
-    margin-top: 3.5rem;
-    margin-bottom: 1.25rem;
-    font-size: 1.75rem;
-    font-weight: 500;
-    letter-spacing: -0.02em;
-  }
-
-  .content :global(h3) {
-    color: #fff;
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
-    font-size: 1.35rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-  }
-
-  .content :global(p) {
-    margin-bottom: 1.5rem;
-  }
-
-  .content :global(ul),
-  .content :global(ol) {
-    margin-bottom: 1.5rem;
-    padding-left: 1.75rem;
-  }
-
-  .content :global(li) {
-    margin-bottom: 0.75rem;
-  }
-
-  .content :global(code) {
-    background: #131313;
-    border: 1px solid #252525;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.9em;
-    color: #e0e0e0;
-    font-family: 'Courier New', monospace;
-  }
-
-  .content :global(pre) {
-    background: #131313;
-    border: 1px solid #252525;
-    padding: 1.5rem;
-    border-radius: 8px;
-    overflow-x: auto;
-    margin-bottom: 1.5rem;
-  }
-
-  .content :global(pre code) {
-    background: none;
-    border: none;
-    padding: 0;
-  }
-
-  .content :global(img) {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-    margin: 2rem 0;
-    border: 1px solid #252525;
-  }
-
-  .content :global(blockquote) {
-    border-left: 3px solid #4a9eff;
-    padding-left: 2rem;
-    margin: 2rem 0;
-    color: #888;
-    font-style: italic;
-  }
-
-  .content :global(a) {
-    color: #4a9eff;
-    text-decoration: none;
-  }
-
-  .content :global(a:hover) {
-    text-decoration: underline;
-  }
-
-  .content :global(video) {
-    max-width: 100%;
-    border-radius: 8px;
-    margin: 2rem 0;
-    border: 1px solid #252525;
-  }
-
-  .update-footer {
-    margin-top: 5rem;
-    padding-top: 2.5rem;
-    border-top: 1px solid #252525;
-  }
-
-  .back-link {
-    color: #888;
-    text-decoration: none;
-    font-size: 0.95rem;
-    transition: color 0.3s ease;
-  }
-
-  .back-link:hover {
-    color: #4a9eff;
-  }
-
-  @media (max-width: 768px) {
-    h1 {
-      font-size: 2rem;
-    }
-
-    .summary {
-      font-size: 1.05rem;
-    }
-
-    .content {
-      font-size: 1rem;
-    }
-
-    .content :global(h2) {
-      font-size: 1.5rem;
-    }
-
-    .content :global(h3) {
-      font-size: 1.25rem;
-    }
+  @media (max-width: 768px){
+    h1{ font-size:2rem; }
+    .summary{ font-size:1.02rem; }
+    .content{ font-size:1rem; }
+    .content :global(h2){ font-size:1.5rem; }
+    .content :global(h3){ font-size:1.2rem; }
   }
 </style>
