@@ -4,5 +4,6 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   site: 'https://writingsbyali-hub.github.io',
   base: '/workspace-by-ali/',
-  output: 'hybrid',
+  output: 'server',
+  adapter: undefined
 });
