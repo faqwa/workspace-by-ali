@@ -57,6 +57,7 @@ export async function signInWithGitHub() {
     provider: 'github',
     options: {
       redirectTo: `${window.location.origin}/auth/callback`,
+      skipBrowserRedirect: false,
     },
   });
 
