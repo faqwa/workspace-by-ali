@@ -1,0 +1,58 @@
+[
+  {
+    "slug": "2025-10-06-example",
+    "title": "Electrode Housing Redesign v3",
+    "summary": "Redesigned electrode housing with improved thermal dissipation and modular electrode mounting",
+    "category": "plasma-hardware",
+    "tags": [
+      "CAD",
+      "electrodes",
+      "thermal-management"
+    ],
+    "status": "in-progress",
+    "updated_at": null,
+    "safety_level": "open",
+    "repo_target": "personal"
+  },
+  {
+    "slug": "2025-10-12-testing-if-tthis-works",
+    "title": "testing if tthis works",
+    "summary": "trying to find pieces",
+    "category": "plasma-hardware",
+    "tags": [],
+    "status": "in-progress",
+    "updated_at": null,
+    "safety_level": "open",
+    "repo_target": "personal"
+  },
+  {
+    "slug": "2025-10-06-example",
+    "title": "First Saltwater Plasma Test - Arc Instability",
+    "summary": "Initial test with 3.5% NaCl solution showed plasma formation but arc became unstable after 5 seconds",
+    "category": "reactive-species",
+    "tags": [
+      "experiment",
+      "saltwater",
+      "arc-stability"
+    ],
+    "status": "in-progress",
+    "updated_at": null,
+    "safety_level": "open",
+    "repo_target": "personal"
+  },
+  {
+    "slug": "2025-10-06-example",
+    "title": "Literature Review: Ion Transport in Plasma-Liquid Interface",
+    "summary": "Summary of recent papers on ion behavior at plasma-saltwater boundaries and implications for our setup",
+    "category": "saltwater-dynamics",
+    "tags": [
+      "research",
+      "theory",
+      "ion-transport"
+    ],
+    "status": "completed",
+    "updated_at": null,
+    "safety_level": "open",
+    "repo_target": "personal"
+  }
+]

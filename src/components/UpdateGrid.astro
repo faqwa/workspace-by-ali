@@ -1,0 +1,73 @@
+---
+import UpdateCard from './UpdateCard.astro';
+import indexData from '../../public/updates-index.json' assert { type: 'json' };
+
+interface UpdateEntry {
+  slug: string;
+  title: string;
+  summary: string;
+  category: string;
+  tags: string[];
+  status: string;
+  updated_at?: string | null;
+  safety_level?: string;
+  repo_target?: string;
+  visibility?: string;
+}
+
+const updates: UpdateEntry[] = (indexData.items ?? indexData) as UpdateEntry[];
+
+
+// Props
+interface Props {
+  category?: string;
+  status?: string;
+}
+
+const { category, status } = Astro.props as Props;
+
+// Filter logic
+let filtered: UpdateEntry[] = updates.filter((u) => u.visibility !== 'private');
+
+if (category) filtered = filtered.filter((u) => u.category === category);
+if (status)   filtered = filtered.filter((u) => u.status === status);
+
+// Sort newest first
+filtered = filtered.sort((a, b) => {
+  const da = new Date(a.updated_at ?? '').getTime() || 0;
+  const db = new Date(b.updated_at ?? '').getTime() || 0;
+  return db - da;
+});
+---
+
+<section class="update-grid" aria-label="Research updates">
+  {filtered.length > 0 ? (
+    filtered.map((u: UpdateEntry) => (
+    <UpdateCard
+        title={u.title}
+        summary={u.summary}
+        category={u.category}
+        status={u.status}
+        safetyLevel={u.safety_level}
+        updatedAt={u.updated_at ?? undefined}
+    />
+    ))
+  ) : (
+    <p class="empty">No updates found.</p>
+  )}
+</section>
+
+<style>
+.update-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+}
+.empty {
+  color: var(--muted);
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 3rem 0;
+}
+</style>
