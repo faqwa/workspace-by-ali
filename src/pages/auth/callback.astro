@@ -6,7 +6,10 @@
  * It exchanges the auth code for a session and redirects to the dashboard.
  */
 
-import { supabase } from '../../lib/supabase';
+import { createSupabaseServer } from '../../lib/supabaseServer';
+
+// Create Supabase client with cookie handling
+const supabase = createSupabaseServer(Astro.cookies);
 
 // Handle the OAuth callback
 const url = new URL(Astro.request.url);
@@ -29,20 +32,26 @@ if (code) {
       return Astro.redirect('/login?error=auth_failed');
     }
 
-    if (data.session) {
-      // Check if this is first login (onboarding needed)
-      const { data: userProfile } = await supabase
+    if (data.session && data.user) {
+      // Create or update user profile
+      const { error: upsertError } = await supabase
         .from('users')
-        .select('*')
-        .eq('id', data.user.id)
-        .single();
+        .upsert({
+          id: data.user.id,
+          email: data.user.email!,
+          full_name: data.user.user_metadata?.full_name || null,
+          avatar_url: data.user.user_metadata?.avatar_url || null,
+          last_signin: new Date().toISOString(),
+        }, {
+          onConflict: 'id'
+        });
 
-      if (!userProfile) {
-        // First time login - redirect to onboarding
-        return Astro.redirect('/onboarding');
+      if (upsertError) {
+        console.error('Error creating user profile:', upsertError);
+        // Continue anyway - user can be created later
       }
 
-      // Existing user - redirect to dashboard
+      // Redirect to projects page
       return Astro.redirect('/projects');
     }
   } catch (err) {

@@ -1,5 +1,5 @@
 ---
-import { supabase } from '../lib/supabase';
+import { createSupabaseServer } from '../lib/supabaseServer';
 
 interface Props {
   title: string;
@@ -13,7 +13,8 @@ const {
   canonicalUrl
 } = Astro.props;
 
-// Check if user is authenticated (server-side)
+// Check if user is authenticated (server-side with cookies)
+const supabase = createSupabaseServer(Astro.cookies);
 const { data: { session } } = await supabase.auth.getSession();
 const user = session?.user;
 

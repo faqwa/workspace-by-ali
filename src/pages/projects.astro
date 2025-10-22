@@ -1,8 +1,9 @@
 ---
 import Layout from '../components/Layout.astro';
-import { supabase } from '../lib/supabase';
+import { createSupabaseServer } from '../lib/supabaseServer';
 
 // Check authentication
+const supabase = createSupabaseServer(Astro.cookies);
 const { data: { session } } = await supabase.auth.getSession();
 
 if (!session) {
