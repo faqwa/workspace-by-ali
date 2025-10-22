@@ -24,16 +24,26 @@ if (error) {
 
 if (code) {
   try {
+    console.log('[Auth Callback] Exchanging code for session...');
+
     // Exchange code for session
     const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
     if (exchangeError) {
-      console.error('Error exchanging code for session:', exchangeError);
+      console.error('[Auth Callback] Error exchanging code:', exchangeError);
       return Astro.redirect('/login?error=auth_failed');
     }
 
+    console.log('[Auth Callback] Session created:', {
+      hasSession: !!data.session,
+      hasUser: !!data.user,
+      userId: data.user?.id,
+      email: data.user?.email
+    });
+
     if (data.session && data.user) {
       // Create or update user profile
+      console.log('[Auth Callback] Upserting user profile...');
       const { error: upsertError } = await supabase
         .from('users')
         .upsert({
@@ -47,12 +57,18 @@ if (code) {
         });
 
       if (upsertError) {
-        console.error('Error creating user profile:', upsertError);
+        console.error('[Auth Callback] Error creating user profile:', upsertError);
         // Continue anyway - user can be created later
+      } else {
+        console.log('[Auth Callback] User profile created/updated successfully');
       }
 
       // Redirect to projects page
+      console.log('[Auth Callback] Redirecting to /projects');
       return Astro.redirect('/projects');
+    } else {
+      console.error('[Auth Callback] No session or user in response');
+      return Astro.redirect('/login?error=no_session');
     }
   } catch (err) {
     console.error('Unexpected error during auth callback:', err);

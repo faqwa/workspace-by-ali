@@ -14,13 +14,22 @@ export function createSupabaseServer(cookies: AstroCookies) {
     {
       cookies: {
         get(key: string) {
-          return cookies.get(key)?.value;
+          const cookie = cookies.get(key);
+          return cookie?.value;
         },
         set(key: string, value: string, options: any) {
-          cookies.set(key, value, options);
+          cookies.set(key, value, {
+            ...options,
+            path: '/',
+            sameSite: 'lax',
+            secure: import.meta.env.PROD,
+          });
         },
         remove(key: string, options: any) {
-          cookies.delete(key, options);
+          cookies.delete(key, {
+            ...options,
+            path: '/',
+          });
         },
       },
     }
