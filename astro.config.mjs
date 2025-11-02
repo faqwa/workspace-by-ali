@@ -1,10 +1,13 @@
 import { defineConfig } from 'astro/config';
 import vercel from '@astrojs/vercel/serverless';
+import react from '@astrojs/react';
 
-// Update YOUR-USERNAME with your GitHub username when deploying
+// https://astro.build/config
 export default defineConfig({
-  site: 'https://writingsbyali-hub.github.io',
-  base: '/workspace-by-ali/',
+  site: 'https://workspace.xbyali.page',
   output: 'server',
   adapter: vercel(),
+  integrations: [react()],
+  // Remove base path for Vercel deployment
+  // (GitHub Pages base path no longer needed)
 });

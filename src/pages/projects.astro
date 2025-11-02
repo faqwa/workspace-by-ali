@@ -1,0 +1,192 @@
+---
+import Layout from '../components/Layout.astro';
+import DashboardSidebar from '../components/DashboardSidebar.astro';
+import { DashboardStats } from '../components/DashboardStats';
+
+// User is guaranteed to exist here - middleware protects this route
+const user = Astro.locals.user!;
+
+// TODO: Fetch user's projects from database
+// For now, show empty state with mock stats
+const projects = [];
+
+// Mock stats for now - will be replaced with real data
+const stats = {
+  totalProjects: 0,
+  activeStreams: 0,
+  submissions: 0,
+  collaborators: 1, // Just the user themselves for now
+};
+---
+
+<Layout title="My Projects — Workspace" description="Manage your research projects" user={user}>
+  <DashboardSidebar currentPath="/projects" />
+
+  <!-- Main content area with sidebar offset -->
+  <main class="lg:pl-72">
+    <div class="dashboard-container">
+      <!-- Dashboard Stats -->
+      <div class="px-4 sm:px-6 lg:px-8 pt-8">
+        <DashboardStats stats={stats} client:load />
+      </div>
+
+      <!-- Projects Section -->
+      <div class="px-4 sm:px-6 lg:px-8">
+        <header class="page-header">
+          <div>
+            <h1>My Projects</h1>
+            <p class="subtitle">Manage your research and build logs</p>
+          </div>
+          <button class="create-button" id="create-project-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            New Project
+          </button>
+        </header>
+
+        {projects.length === 0 ? (
+          <div class="empty-state">
+            <div class="empty-icon">📁</div>
+            <h2>No projects yet</h2>
+            <p>Create your first project to start documenting your research</p>
+            <button class="create-button-large">
+              Create Your First Project
+            </button>
+          </div>
+        ) : (
+          <div class="projects-grid">
+            {/* Projects will be mapped here */}
+          </div>
+        )}
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .dashboard-container {
+    min-height: 100vh;
+    padding-bottom: 3rem;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 3rem;
+    gap: 2rem;
+  }
+
+  h1 {
+    margin: 0 0 0.5rem;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text-1);
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--text-4);
+    font-size: 1rem;
+  }
+
+  .create-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--brand);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .create-button:hover {
+    background: var(--brand-2);
+    transform: translateY(-1px);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 6rem 2rem;
+    background: var(--elev-2);
+    border: 1px dashed var(--border-3);
+    border-radius: var(--radius-md);
+    margin-top: 2rem;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+  }
+
+  .empty-state h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.5rem;
+    color: var(--text-1);
+  }
+
+  .empty-state p {
+    margin: 0 0 2rem;
+    color: var(--text-4);
+    font-size: 1.05rem;
+  }
+
+  .create-button-large {
+    background: var(--brand);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .create-button-large:hover {
+    background: var(--brand-2);
+    transform: translateY(-2px);
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+    }
+
+    .create-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<script>
+  // TODO: Implement project creation modal
+  const createButtons = document.querySelectorAll('.create-button, .create-button-large');
+  createButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      alert('Project creation modal coming soon!');
+    });
+  });
+</script>

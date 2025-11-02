@@ -3,8 +3,14 @@ import Layout from '../components/Layout.astro';
 import CategorySection from '../components/CategorySection.astro';
 import { getCollection } from 'astro:content';
 
+// Get user from middleware (if authenticated)
+const user = Astro.locals.user;
+
+// Get all updates and sort by date (newest first)
 const allUpdates = await getCollection('updates');
-const sortedUpdates = allUpdates.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const sortedUpdates = allUpdates.sort((a, b) =>
+  b.data.date.getTime() - a.data.date.getTime()
+);
 
 const plasmaHardware = sortedUpdates.filter(u => u.data.category === 'plasma-hardware');
 const saltwaterDynamics = sortedUpdates.filter(u => u.data.category === 'saltwater-dynamics');
@@ -14,7 +20,7 @@ const latestUpdate = sortedUpdates[0]?.data.date;
 const formattedDate = latestUpdate?.toLocaleDateString('en-AU', { year:'numeric', month:'long', day:'numeric' });
 ---
 
-<Layout title="Workspace by Ali — Live Research Updates" description="Live ArcUp research notes, experiments, and iteration logs.">
+<Layout title="Workspace by Ali" user={user}>
   <div class="container">
     <header class="hero" role="banner">
       <h1>What I'm Currently Working On</h1>

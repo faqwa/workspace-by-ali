@@ -12,14 +12,26 @@
     "format": "prettier --write \"src/**/*.{astro,ts,tsx,js,css,md}\""
   },
   "dependencies": {
-    "@astrojs/vercel": "^8.2.9",
-    "@octokit/rest": "^22.0.0",
-    "@vercel/node": "^5.3.26",
-    "astro": "^5.14.1",
-    "uuid": "^13.0.0"
+    "@astrojs/react": "^4.4.1",
+    "@astrojs/vercel": "^8.2.11",
+    "@headlessui/react": "^2.2.9",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.76.1",
+    "@tremor/react": "^3.18.7",
+    "astro": "^5.14.8",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwind-merge": "^3.3.1",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/node": "^24.7.2",
-    "@types/uuid": "^10.0.0"
+    "@astrojs/check": "^0.9.5",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.5.0"
   }
 }
