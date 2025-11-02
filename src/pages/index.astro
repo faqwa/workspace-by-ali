@@ -1,89 +1,212 @@
 ---
-import Layout from '../components/Layout.astro';
-import CategorySection from '../components/CategorySection.astro';
-import { getCollection } from 'astro:content';
+import DashboardLayout from '../components/DashboardLayout.astro';
+import { DashboardStats } from '../components/DashboardStats';
 
 // Get user from middleware (if authenticated)
 const user = Astro.locals.user;
 
-// Get all updates and sort by date (newest first)
-const allUpdates = await getCollection('updates');
-const sortedUpdates = allUpdates.sort((a, b) =>
-  b.data.date.getTime() - a.data.date.getTime()
-);
+// If not authenticated, redirect to login
+if (!user) {
+  return Astro.redirect('/login');
+}
 
-const plasmaHardware = sortedUpdates.filter(u => u.data.category === 'plasma-hardware');
-const saltwaterDynamics = sortedUpdates.filter(u => u.data.category === 'saltwater-dynamics');
-const reactiveSpecies = sortedUpdates.filter(u => u.data.category === 'reactive-species');
-
-const latestUpdate = sortedUpdates[0]?.data.date;
-const formattedDate = latestUpdate?.toLocaleDateString('en-AU', { year:'numeric', month:'long', day:'numeric' });
+// TODO: Fetch real stats from database
+// For now, show mock stats
+const stats = {
+  totalProjects: 0,
+  activeStreams: 0,
+  submissions: 0,
+  collaborators: 1,
+};
 ---
 
-<Layout title="Workspace by Ali" user={user}>
-  <div class="container">
-    <header class="hero" role="banner">
-      <h1>What I'm Currently Working On</h1>
-      <p class="subtitle">
-        Live updates from active ArcUp plasma research — experiments, failures, iteration, and progress.
-      </p>
-      {latestUpdate && <p class="last-updated">Last updated <time datetime={latestUpdate.toISOString()}>{formattedDate}</time></p>}
+<DashboardLayout title="Dashboard — Workspace" user={user} currentPath="/">
+  <div class="px-4 sm:px-6 lg:px-8 pt-8 pb-12">
+    <!-- Welcome Header -->
+    <header class="welcome-header">
+      <div>
+        <h1>Welcome back, {user.email?.split('@')[0]}!</h1>
+        <p class="subtitle">Here's an overview of your workspace</p>
+      </div>
     </header>
 
-    <div class="categories" role="region" aria-label="Update categories">
-      {plasmaHardware.length > 0 && (
-        <CategorySection
-          title="Plasma Hardware & Design"
-          description="Circuit design, CAD models, assembly, and hardware iteration."
-          updates={plasmaHardware}
-          category="plasma-hardware"
-        />
-      )}
+    <!-- Dashboard Stats -->
+    <DashboardStats stats={stats} client:load />
 
-      {saltwaterDynamics.length > 0 && (
-        <CategorySection
-          title="Saltwater & Plasma Dynamics"
-          description="Molecular interactions, physics modelling, and theoretical work."
-          updates={saltwaterDynamics}
-          category="saltwater-dynamics"
-        />
-      )}
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h2>Quick Actions</h2>
+      <div class="actions-grid">
+        <a href="/projects" class="action-card">
+          <div class="action-icon">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+            </svg>
+          </div>
+          <h3>View Projects</h3>
+          <p>Browse and manage your research projects</p>
+        </a>
 
-      {reactiveSpecies.length > 0 && (
-        <CategorySection
-          title="Reactive Species in Saltwater"
-          description="Experimental data, reactions, measurements, and observations."
-          updates={reactiveSpecies}
-          category="reactive-species"
-        />
-      )}
+        <button class="action-card" id="create-project">
+          <div class="action-icon">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </div>
+          <h3>New Project</h3>
+          <p>Start a new research project</p>
+        </button>
+
+        <a href="/updates" class="action-card">
+          <div class="action-icon">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" />
+            </svg>
+          </div>
+          <h3>View Updates</h3>
+          <p>Check recent project updates and notes</p>
+        </a>
+
+        <button class="action-card" id="create-stream">
+          <div class="action-icon">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+          </div>
+          <h3>New Stream</h3>
+          <p>Create a new work stream</p>
+        </button>
+      </div>
     </div>
 
-    {sortedUpdates.length === 0 && (
-      <div class="empty-state" role="status" aria-live="polite">
-        <p>No updates yet. The work begins soon.</p>
+    <!-- Recent Activity (placeholder) -->
+    <div class="recent-activity">
+      <h2>Recent Activity</h2>
+      <div class="activity-placeholder">
+        <p>No recent activity yet. Start by creating your first project!</p>
       </div>
-    )}
+    </div>
   </div>
-</Layout>
+</DashboardLayout>
 
 <style>
-  .hero{
-    text-align:center; margin-bottom:5rem; padding:2.5rem 0 3.5rem;
+  .welcome-header {
+    margin-bottom: 3rem;
   }
-  h1{
-    font-size:2.6rem; font-weight:700; margin:0 0 1rem; color:var(--text-1);
-    letter-spacing:-.03em; line-height:1.2;
-  }
-  .subtitle{
-    font-size:1.08rem; color:var(--text-4); max-width:700px; margin:0 auto 1.25rem; line-height:1.7;
-  }
-  .last-updated{ color:var(--muted); font-size:.9rem; margin:0; }
-  .categories{ margin-top:3rem; }
-  .empty-state{ text-align:center; padding:5rem 2rem; color:var(--muted); font-size:1.05rem; }
 
-  @media (max-width: 768px){
-    h1{ font-size:2rem; }
-    .subtitle{ font-size:1rem; }
+  h1 {
+    margin: 0 0 0.5rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-1);
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--text-4);
+    font-size: 1.1rem;
+  }
+
+  h2 {
+    margin: 0 0 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-1);
+  }
+
+  .quick-actions {
+    margin-top: 4rem;
+  }
+
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .action-card {
+    background: var(--elev-2);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .action-card:hover {
+    background: var(--elev-3);
+    border-color: var(--brand);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-1);
+  }
+
+  .action-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 1rem;
+    background: var(--brand);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+
+  .action-card h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-1);
+  }
+
+  .action-card p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-4);
+  }
+
+  .recent-activity {
+    margin-top: 4rem;
+  }
+
+  .activity-placeholder {
+    background: var(--elev-2);
+    border: 1px dashed var(--border-3);
+    border-radius: var(--radius-md);
+    padding: 3rem;
+    text-align: center;
+  }
+
+  .activity-placeholder p {
+    margin: 0;
+    color: var(--text-4);
+    font-size: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem;
+    }
+
+    .actions-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
+
+<script>
+  const createProjectBtn = document.getElementById('create-project');
+  const createStreamBtn = document.getElementById('create-stream');
+
+  createProjectBtn?.addEventListener('click', () => {
+    alert('Project creation coming soon!');
+  });
+
+  createStreamBtn?.addEventListener('click', () => {
+    alert('Stream creation coming soon!');
+  });
+</script>

@@ -1,0 +1,89 @@
+---
+import Layout from '../components/Layout.astro';
+import CategorySection from '../components/CategorySection.astro';
+import { getCollection } from 'astro:content';
+
+// Get user from middleware (if authenticated)
+const user = Astro.locals.user;
+
+// Get all updates and sort by date (newest first)
+const allUpdates = await getCollection('updates');
+const sortedUpdates = allUpdates.sort((a, b) =>
+  b.data.date.getTime() - a.data.date.getTime()
+);
+
+const plasmaHardware = sortedUpdates.filter(u => u.data.category === 'plasma-hardware');
+const saltwaterDynamics = sortedUpdates.filter(u => u.data.category === 'saltwater-dynamics');
+const reactiveSpecies = sortedUpdates.filter(u => u.data.category === 'reactive-species');
+
+const latestUpdate = sortedUpdates[0]?.data.date;
+const formattedDate = latestUpdate?.toLocaleDateString('en-AU', { year:'numeric', month:'long', day:'numeric' });
+---
+
+<Layout title="Workspace by Ali" user={user}>
+  <div class="container">
+    <header class="hero" role="banner">
+      <h1>What I'm Currently Working On</h1>
+      <p class="subtitle">
+        Live updates from active ArcUp plasma research — experiments, failures, iteration, and progress.
+      </p>
+      {latestUpdate && <p class="last-updated">Last updated <time datetime={latestUpdate.toISOString()}>{formattedDate}</time></p>}
+    </header>
+
+    <div class="categories" role="region" aria-label="Update categories">
+      {plasmaHardware.length > 0 && (
+        <CategorySection
+          title="Plasma Hardware & Design"
+          description="Circuit design, CAD models, assembly, and hardware iteration."
+          updates={plasmaHardware}
+          category="plasma-hardware"
+        />
+      )}
+
+      {saltwaterDynamics.length > 0 && (
+        <CategorySection
+          title="Saltwater & Plasma Dynamics"
+          description="Molecular interactions, physics modelling, and theoretical work."
+          updates={saltwaterDynamics}
+          category="saltwater-dynamics"
+        />
+      )}
+
+      {reactiveSpecies.length > 0 && (
+        <CategorySection
+          title="Reactive Species in Saltwater"
+          description="Experimental data, reactions, measurements, and observations."
+          updates={reactiveSpecies}
+          category="reactive-species"
+        />
+      )}
+    </div>
+
+    {sortedUpdates.length === 0 && (
+      <div class="empty-state" role="status" aria-live="polite">
+        <p>No updates yet. The work begins soon.</p>
+      </div>
+    )}
+  </div>
+</Layout>
+
+<style>
+  .hero{
+    text-align:center; margin-bottom:5rem; padding:2.5rem 0 3.5rem;
+  }
+  h1{
+    font-size:2.6rem; font-weight:700; margin:0 0 1rem; color:var(--text-1);
+    letter-spacing:-.03em; line-height:1.2;
+  }
+  .subtitle{
+    font-size:1.08rem; color:var(--text-4); max-width:700px; margin:0 auto 1.25rem; line-height:1.7;
+  }
+  .last-updated{ color:var(--muted); font-size:.9rem; margin:0; }
+  .categories{ margin-top:3rem; }
+  .empty-state{ text-align:center; padding:5rem 2rem; color:var(--muted); font-size:1.05rem; }
+
+  @media (max-width: 768px){
+    h1{ font-size:2rem; }
+    .subtitle{ font-size:1rem; }
+  }
+</style>

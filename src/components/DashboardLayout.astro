@@ -1,0 +1,296 @@
+---
+import type { User } from '@supabase/supabase-js';
+
+interface Props {
+  title: string;
+  description?: string;
+  user?: User | null;
+  currentPath?: string;
+}
+
+const {
+  title,
+  description = "Workspace by Ali — Dashboard",
+  user = null,
+  currentPath = '/'
+} = Astro.props;
+
+const today = new Date();
+
+const navItems = [
+  {
+    name: 'Dashboard',
+    href: '/',
+    icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+  },
+  {
+    name: 'Projects',
+    href: '/projects',
+    icon: 'M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z',
+  },
+];
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0a0a0a" />
+
+    <style is:global>
+      :root{
+        --bg: #0a0a0a;
+        --elev-1: #0f0f0f;
+        --elev-2: #131313;
+        --elev-3: #161616;
+        --border-1:#202020;
+        --border-2:#252525;
+        --border-3:#353535;
+        --text-1:#ffffff;
+        --text-2:#e0e0e0;
+        --text-3:#bbbbbb;
+        --text-4:#888888;
+        --text-5:#666666;
+        --muted:#555555;
+        --brand:#4a9eff;
+        --brand-2:#6bb0ff;
+        --ok:#22c55e;
+        --warn:#f59e0b;
+        --err:#ef4444;
+        --radius-sm:6px;
+        --radius-md:12px;
+        --shadow-1: 0 2px 16px rgba(0,0,0,.25);
+        --container: 1200px;
+        --focus: 0 0 0 3px rgba(74,158,255,.45);
+      }
+
+      *{ box-sizing:border-box; }
+      html,body{ height:100%; }
+      body{
+        margin:0;
+        font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu, sans-serif;
+        background:var(--bg);
+        color:var(--text-2);
+        line-height:1.7;
+      }
+      a{ color:inherit; }
+      img{ max-width:100%; height:auto; display:block; }
+    </style>
+
+    <style>
+      /* Dashboard layout - sidebar + content */
+      .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: 250px;
+        background: var(--elev-1);
+        border-right: 1px solid var(--border-2);
+        padding: 2rem 1.5rem;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+      }
+
+      .sidebar-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-2);
+      }
+
+      .sidebar-logo {
+        color: var(--text-1);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .sidebar-nav {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .sidebar-nav-item {
+        margin-bottom: 0.5rem;
+      }
+
+      .sidebar-nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        color: var(--text-4);
+        transition: all 0.2s ease;
+      }
+
+      .sidebar-nav-link:hover {
+        background: var(--elev-2);
+        color: var(--text-1);
+      }
+
+      .sidebar-nav-link.active {
+        background: var(--elev-2);
+        color: var(--brand);
+        border-left: 3px solid var(--brand);
+        padding-left: calc(1rem - 3px);
+      }
+
+      .sidebar-nav-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+
+      .sidebar-footer {
+        margin-top: auto;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-2);
+      }
+
+      .user-menu-sidebar {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: var(--elev-2);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .user-menu-sidebar:hover {
+        background: var(--elev-3);
+      }
+
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--brand);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: white;
+        flex-shrink: 0;
+      }
+
+      .user-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .user-email {
+        font-size: 0.85rem;
+        color: var(--text-2);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* Main content */
+      .main-content {
+        margin-left: 250px;
+        flex: 1;
+        min-height: 100vh;
+      }
+
+      /* Mobile responsive */
+      @media (max-width: 1024px) {
+        .sidebar {
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
+        }
+
+        .sidebar.open {
+          transform: translateX(0);
+        }
+
+        .main-content {
+          margin-left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <a href="/" class="sidebar-logo">Workspace</a>
+        </div>
+
+        <nav>
+          <ul class="sidebar-nav">
+            {navItems.map((item) => {
+              const isActive = currentPath === item.href;
+              return (
+                <li class="sidebar-nav-item">
+                  <a
+                    href={item.href}
+                    class={`sidebar-nav-link ${isActive ? 'active' : ''}`}
+                  >
+                    <svg
+                      class="sidebar-nav-icon"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d={item.icon} />
+                    </svg>
+                    <span>{item.name}</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        {user && (
+          <div class="sidebar-footer">
+            <button class="user-menu-sidebar" id="user-menu-button">
+              <div class="user-avatar">
+                {user.email?.charAt(0).toUpperCase()}
+              </div>
+              <div class="user-info">
+                <div class="user-email">{user.email}</div>
+              </div>
+            </button>
+          </div>
+        )}
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <slot />
+      </main>
+    </div>
+
+    {user && (
+      <script>
+        const userButton = document.getElementById('user-menu-button');
+        userButton?.addEventListener('click', async () => {
+          if (confirm('Sign out?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/api/auth/signout';
+            document.body.appendChild(form);
+            form.submit();
+          }
+        });
+      </script>
+    )}
+  </body>
+</html>
