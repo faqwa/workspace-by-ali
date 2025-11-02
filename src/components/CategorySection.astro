@@ -1,132 +1,86 @@
 ---
 import UpdateCard from './UpdateCard.astro';
 
+type Status = 'in-progress' | 'completed' | 'blocked' | 'paused';
+
+interface UpdateItem {
+  data: {
+    title: string;
+    date: Date;
+    summary: string;
+    category: string;
+    status?: Status;
+  };
+  slug: string;
+}
+
 interface Props {
   title: string;
   description: string;
-  updates: Array<{
-    data: {
-      title: string;
-      date: Date;
-      summary: string;
-      category: string;
-      status?: string;
-    };
-    slug: string;
-  }>;
+  updates: UpdateItem[];
   category: string;
 }
 
 const { title, description, updates, category } = Astro.props;
 
-// Show only 3 most recent
 const visibleUpdates = updates.slice(0, 3);
 const hasMore = updates.length > 3;
+const sectionId = `cat-${category}`;
 ---
 
-<section class="category-section">
+<section class="category-section" aria-labelledby={sectionId}>
   <div class="section-header">
     <div>
-      <h2>{title}</h2>
+      <h2 id={sectionId}>{title}</h2>
       <p class="description">{description}</p>
     </div>
     {hasMore && (
-      <a href={`/updates/${category}`} class="view-all">
+      <a href={`/updates/${category}`} class="view-all" aria-label={`View all ${updates.length} updates in ${title}`}>
         View all {updates.length} →
       </a>
     )}
   </div>
 
-  <div class="cards-container">
+  <div class="cards-container" role="list">
     {visibleUpdates.map((update) => (
-      <UpdateCard
-        title={update.data.title}
-        date={update.data.date}
-        summary={update.data.summary}
-        category={update.data.category}
-        slug={update.slug}
-        status={update.data.status}
-      />
+      <div role="listitem">
+        <UpdateCard
+          title={update.data.title}
+          date={update.data.date}
+          summary={update.data.summary}
+          category={update.data.category}
+          slug={update.slug}
+          status={update.data.status}
+        />
+      </div>
     ))}
   </div>
 </section>
 
 <style>
-  .category-section {
-    margin-bottom: 6rem;
+  .category-section{ margin-bottom: 5rem; }
+  .section-header{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:1rem; margin-bottom:2rem; padding-bottom:1.25rem; border-bottom:1px solid var(--border-2);
   }
-
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: 2.5rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid #252525;
+  h2{
+    margin:0 0 .5rem; font-size:1.5rem; font-weight:600; color:var(--text-1); letter-spacing:-.02em;
   }
-
-  h2 {
-    margin: 0 0 0.75rem 0;
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: #fff;
-    letter-spacing: -0.02em;
+  .description{ color:var(--text-4); margin:0; font-size:.95rem; line-height:1.6; }
+  .view-all{
+    color:var(--brand); text-decoration:none; font-weight:500; font-size:.9rem; white-space:nowrap;
   }
-
-  .description {
-    color: #888;
-    margin: 0;
-    font-size: 0.95rem;
-    line-height: 1.6;
+  .view-all:hover{ color:var(--brand-2); }
+  .cards-container{
+    display:flex; gap:1.5rem; overflow-x:auto; padding: .25rem 0 1.25rem;
+    scrollbar-width:thin; scrollbar-color: var(--border-2) transparent;
   }
+  .cards-container::-webkit-scrollbar{ height:6px; }
+  .cards-container::-webkit-scrollbar-thumb{ background:var(--border-2); border-radius:3px; }
+  .cards-container::-webkit-scrollbar-thumb:hover{ background:var(--border-3); }
 
-  .view-all {
-    color: #4a9eff;
-    text-decoration: none;
-    font-weight: 400;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    transition: color 0.3s ease;
-  }
-
-  .view-all:hover {
-    color: #6bb0ff;
-  }
-
-  .cards-container {
-    display: flex;
-    gap: 2rem;
-    overflow-x: auto;
-    padding-bottom: 1.5rem;
-    scrollbar-width: thin;
-    scrollbar-color: #252525 transparent;
-  }
-
-  .cards-container::-webkit-scrollbar {
-    height: 6px;
-  }
-
-  .cards-container::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .cards-container::-webkit-scrollbar-thumb {
-    background: #252525;
-    border-radius: 3px;
-  }
-
-  .cards-container::-webkit-scrollbar-thumb:hover {
-    background: #353535;
-  }
-
-  @media (max-width: 768px) {
-    .section-header {
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    h2 {
-      font-size: 1.35rem;
-    }
+  @media (max-width: 768px){
+    h2{ font-size:1.35rem; }
+    .cards-container{ gap:1rem; }
   }
 </style>

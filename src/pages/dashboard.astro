@@ -4,305 +4,178 @@ import { getCollection } from 'astro:content';
 
 const allUpdates = await getCollection('updates');
 
-// Calculate stats
 const inProgress = allUpdates.filter(u => u.data.status === 'in-progress').length;
-const completed = allUpdates.filter(u => u.data.status === 'completed').length;
-const blocked = allUpdates.filter(u => u.data.status === 'blocked').length;
+const completed  = allUpdates.filter(u => u.data.status === 'completed').length;
+const blocked    = allUpdates.filter(u => u.data.status === 'blocked').length;
 
-// Get recent activity (last 7 days)
 const sevenDaysAgo = new Date();
 sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 const recentUpdates = allUpdates.filter(u => u.data.date >= sevenDaysAgo);
 ---
 
-<Layout title="Dashboard - Workspace by Ali">
+<Layout title="Project Dashboard — Workspace by Ali" description="Current status, needs, and priorities for ArcUp research.">
   <div class="container">
     <header class="page-header">
       <h1>Project Dashboard</h1>
-      <p class="subtitle">Current status and priorities for ArcUp research</p>
+      <p class="subtitle">Current status and priorities for ArcUp research.</p>
     </header>
 
-    <div class="stats-grid">
-      <div class="stat-card">
+    <section aria-labelledby="stats" class="stats-grid">
+      <h2 id="stats" class="visually-hidden">Statistics</h2>
+      <div class="stat-card" aria-label="Total updates">
         <div class="stat-value">{allUpdates.length}</div>
         <div class="stat-label">Total Updates</div>
       </div>
-      <div class="stat-card progress">
+      <div class="stat-card progress" aria-label="In progress">
         <div class="stat-value">{inProgress}</div>
         <div class="stat-label">In Progress</div>
       </div>
-      <div class="stat-card complete">
+      <div class="stat-card complete" aria-label="Completed">
         <div class="stat-value">{completed}</div>
         <div class="stat-label">Completed</div>
       </div>
-      <div class="stat-card block">
+      <div class="stat-card block" aria-label="Blocked">
         <div class="stat-value">{blocked}</div>
         <div class="stat-label">Blocked</div>
       </div>
-    </div>
+    </section>
 
-    <section class="dashboard-section">
-      <h2>What I Need Right Now</h2>
-      
+    <section class="dashboard-section" aria-labelledby="needs">
+      <h2 id="needs">What I Need Right Now</h2>
+
       <div class="need-card">
         <h3>🔧 Hardware</h3>
         <ul>
-          <li>High-voltage power supply (12-24V, 5A minimum)</li>
+          <li>High-voltage power supply (12–24V, 5A minimum)</li>
           <li>Thermal camera or IR thermometer</li>
-          <li>Oscilloscope for arc characterization</li>
+          <li>Oscilloscope for arc characterisation</li>
         </ul>
       </div>
 
       <div class="need-card">
         <h3>📚 Knowledge</h3>
         <ul>
-          <li>Plasma physics expertise - particularly arc stability</li>
-          <li>Electrochemistry background for saltwater reactions</li>
-          <li>CAD help for electrode housing redesign</li>
+          <li>Plasma physics — arc stability</li>
+          <li>Electrochemistry for saltwater reactions</li>
+          <li>CAD support for electrode housing redesign</li>
         </ul>
       </div>
 
       <div class="need-card">
         <h3>💡 Ideas</h3>
         <ul>
-          <li>Alternative electrode materials (currently using graphite)</li>
-          <li>Methods to stabilize arc in conductive liquid</li>
+          <li>Alternative electrode materials (currently graphite)</li>
+          <li>Methods to stabilise arc in conductive liquid</li>
           <li>Approaches to measure reactive species concentration</li>
         </ul>
       </div>
     </section>
 
-    <section class="dashboard-section">
-      <h2>Current Priorities</h2>
+    <section class="dashboard-section" aria-labelledby="priorities">
+      <h2 id="priorities">Current Priorities</h2>
       <ol class="priorities">
         <li>
           <div class="priority-content">
             <strong>Electrode Design Iteration</strong>
-            <p>Testing different geometries to improve arc stability</p>
+            <p>Testing geometries to improve arc stability.</p>
           </div>
         </li>
         <li>
           <div class="priority-content">
             <strong>Saltwater Concentration Tests</strong>
-            <p>Finding optimal NaCl percentage for consistent plasma</p>
+            <p>Finding optimal NaCl percentage for consistent plasma.</p>
           </div>
         </li>
         <li>
           <div class="priority-content">
             <strong>Thermal Management</strong>
-            <p>Preventing overheating during extended runs</p>
+            <p>Preventing overheating during extended runs.</p>
           </div>
         </li>
       </ol>
     </section>
 
-    <section class="dashboard-section">
-      <h2>Recent Activity</h2>
+    <section class="dashboard-section" aria-labelledby="activity">
+      <h2 id="activity">Recent Activity</h2>
       <p class="activity-count">
         {recentUpdates.length} update{recentUpdates.length !== 1 ? 's' : ''} in the last 7 days
       </p>
     </section>
 
-    <div class="note">
+    <aside class="note" aria-label="Site note">
       <p><strong>Note:</strong> This dashboard is manually updated. It reflects my current thinking but may be slightly out of date. Check the <a href="/">Updates page</a> for the latest work.</p>
-    </div>
+    </aside>
   </div>
 </Layout>
 
 <style>
-  .page-header {
-    margin-bottom: 4rem;
+  .visually-hidden{
+    position:absolute!important; height:1px; width:1px; overflow:hidden;
+    clip:rect(1px,1px,1px,1px); white-space:nowrap; border:0; padding:0; margin:-1px;
   }
 
-  h1 {
-    margin: 0 0 0.75rem 0;
-    font-size: 2.5rem;
-    font-weight: 500;
-    letter-spacing: -0.03em;
+  .page-header{ margin-bottom:3rem; }
+  h1{ margin:0 0 .75rem; font-size:2.4rem; font-weight:700; letter-spacing:-.03em; color:var(--text-1); }
+  .subtitle{ color:var(--text-4); margin:0; font-size:1.05rem; }
+
+  .stats-grid{
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap:1.5rem; margin-bottom:4rem;
+  }
+  .stat-card{
+    background:var(--elev-2); border:1px solid var(--border-2);
+    border-radius:var(--radius-md); padding:1.75rem; text-align:center;
+  }
+  .stat-card.progress{ border-color: color-mix(in oklab, var(--brand) 30%, transparent); }
+  .stat-card.complete{ border-color: color-mix(in oklab, var(--ok) 30%, transparent); }
+  .stat-card.block{ border-color: color-mix(in oklab, var(--err) 30%, transparent); }
+
+  .stat-value{
+    font-size:2.4rem; font-weight:700; color:var(--text-1); margin-bottom:.5rem; letter-spacing:-.02em;
+  }
+  .stat-label{ color:var(--text-4); font-size:.85rem; text-transform:uppercase; letter-spacing:.05em; }
+
+  .dashboard-section{ margin-bottom:4rem; }
+  .dashboard-section h2{
+    font-size:1.45rem; font-weight:700; margin:0 0 1.5rem; color:var(--text-1); letter-spacing:-.02em;
   }
 
-  .subtitle {
-    color: #888;
-    margin: 0;
-    font-size: 1.05rem;
+  .need-card{
+    background:var(--elev-2); border:1px solid var(--border-2); border-radius:var(--radius-md);
+    padding:1.5rem; margin-bottom:1.25rem;
   }
+  .need-card h3{ margin:0 0 1rem; font-size:1.05rem; font-weight:700; color:var(--text-1); }
+  .need-card ul{ margin:0; padding-left:1.25rem; color:var(--text-3); line-height:1.8; }
+  .need-card li{ margin:.5rem 0; }
 
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 2rem;
-    margin-bottom: 5rem;
+  .priorities{ list-style:none; counter-reset:step; padding:0; margin:0; }
+  .priorities li{
+    counter-increment:step; background:var(--elev-2); border:1px solid var(--border-2);
+    border-radius:var(--radius-md); padding:1.5rem 1.5rem 1.5rem 4.5rem; margin-bottom:1rem; position:relative;
   }
-
-  .stat-card {
-    background: #131313;
-    border: 1px solid #252525;
-    border-radius: 12px;
-    padding: 2rem;
-    text-align: center;
+  .priorities li::before{
+    content: counter(step);
+    position:absolute; left:1.5rem; top:50%; transform:translateY(-50%);
+    width:2.2rem; height:2.2rem; border-radius:50%;
+    background:var(--brand); color:#fff; display:flex; align-items:center; justify-content:center;
+    font-weight:700;
   }
+  .priority-content strong{ display:block; margin-bottom:.4rem; color:var(--text-1); font-size:1.05rem; }
+  .priority-content p{ margin:0; color:var(--text-4); }
 
-  .stat-card.progress {
-    border-color: #4a9eff40;
+  .activity-count{ color:var(--text-3); font-size:1rem; }
+
+  .note{
+    background:var(--elev-2); border:1px solid var(--border-3);
+    border-radius:var(--radius-md); padding:1.5rem; margin-top:3rem;
   }
+  .note p{ margin:0; color:var(--text-4); }
+  .note a{ color:var(--brand); text-decoration:none; }
+  .note a:hover{ color:var(--brand-2); }
 
-  .stat-card.complete {
-    border-color: #22c55e40;
-  }
-
-  .stat-card.block {
-    border-color: #ef444440;
-  }
-
-  .stat-value {
-    font-size: 3rem;
-    font-weight: 500;
-    color: #fff;
-    margin-bottom: 0.75rem;
-    letter-spacing: -0.02em;
-  }
-
-  .stat-label {
-    color: #888;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .dashboard-section {
-    margin-bottom: 5rem;
-  }
-
-  .dashboard-section h2 {
-    font-size: 1.5rem;
-    font-weight: 500;
-    margin-bottom: 2rem;
-    color: #fff;
-    letter-spacing: -0.02em;
-  }
-
-  .need-card {
-    background: #131313;
-    border: 1px solid #252525;
-    border-radius: 12px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-  }
-
-  .need-card h3 {
-    margin: 0 0 1.25rem 0;
-    font-size: 1.05rem;
-    font-weight: 500;
-    color: #fff;
-  }
-
-  .need-card ul {
-    margin: 0;
-    padding-left: 1.5rem;
-    color: #bbb;
-    line-height: 1.8;
-  }
-
-  .need-card li {
-    margin-bottom: 0.75rem;
-  }
-
-  .priorities {
-    list-style: none;
-    counter-reset: priority;
-    padding: 0;
-  }
-
-  .priorities li {
-    counter-increment: priority;
-    background: #131313;
-    border: 1px solid #252525;
-    border-radius: 12px;
-    padding: 2rem;
-    margin-bottom: 1.5rem;
-    position: relative;
-    padding-left: 5rem;
-  }
-
-  .priorities li::before {
-    content: counter(priority);
-    position: absolute;
-    left: 2rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 2.25rem;
-    height: 2.25rem;
-    background: #4a9eff;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    color: white;
-    font-size: 1.1rem;
-  }
-
-  .priority-content strong {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #fff;
-    font-size: 1.05rem;
-    font-weight: 500;
-  }
-
-  .priority-content p {
-    margin: 0;
-    color: #888;
-    line-height: 1.6;
-  }
-
-  .activity-count {
-    color: #bbb;
-    font-size: 1rem;
-  }
-
-  .note {
-    background: #131313;
-    border: 1px solid #353535;
-    border-radius: 12px;
-    padding: 2rem;
-    margin-top: 4rem;
-  }
-
-  .note p {
-    margin: 0;
-    color: #888;
-    line-height: 1.6;
-  }
-
-  .note a {
-    color: #4a9eff;
-    text-decoration: none;
-  }
-
-  .note a:hover {
-    text-decoration: underline;
-  }
-
-  @media (max-width: 768px) {
-    h1 {
-      font-size: 2rem;
-    }
-
-    .stats-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-    }
-
-    .priorities li {
-      padding-left: 4rem;
-    }
-
-    .priorities li::before {
-      left: 1.5rem;
-      width: 2rem;
-      height: 2rem;
-      font-size: 1rem;
-    }
+  @media (max-width: 768px){
+    h1{ font-size:2rem; }
+    .priorities li{ padding-left:4rem; }
+    .priorities li::before{ left:1.1rem; width:2rem; height:2rem; }
   }
 </style>

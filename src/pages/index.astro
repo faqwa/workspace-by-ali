@@ -12,38 +12,29 @@ const sortedUpdates = allUpdates.sort((a, b) =>
   b.data.date.getTime() - a.data.date.getTime()
 );
 
-// Group by category
 const plasmaHardware = sortedUpdates.filter(u => u.data.category === 'plasma-hardware');
 const saltwaterDynamics = sortedUpdates.filter(u => u.data.category === 'saltwater-dynamics');
 const reactiveSpecies = sortedUpdates.filter(u => u.data.category === 'reactive-species');
 
-// Get latest update date
 const latestUpdate = sortedUpdates[0]?.data.date;
-const formattedDate = latestUpdate?.toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric'
-});
+const formattedDate = latestUpdate?.toLocaleDateString('en-AU', { year:'numeric', month:'long', day:'numeric' });
 ---
 
 <Layout title="Workspace by Ali" user={user}>
   <div class="container">
-    <header class="hero">
+    <header class="hero" role="banner">
       <h1>What I'm Currently Working On</h1>
       <p class="subtitle">
-        Live updates from active ArcUp plasma propulsion research.<br />
-        Raw experiments, failures, iterations, and progress.
+        Live updates from active ArcUp plasma research — experiments, failures, iteration, and progress.
       </p>
-      {latestUpdate && (
-        <p class="last-updated">Last updated {formattedDate}</p>
-      )}
+      {latestUpdate && <p class="last-updated">Last updated <time datetime={latestUpdate.toISOString()}>{formattedDate}</time></p>}
     </header>
 
-    <div class="categories">
+    <div class="categories" role="region" aria-label="Update categories">
       {plasmaHardware.length > 0 && (
         <CategorySection
           title="Plasma Hardware & Design"
-          description="Circuit design, CAD models, assembly, and hardware iteration"
+          description="Circuit design, CAD models, assembly, and hardware iteration."
           updates={plasmaHardware}
           category="plasma-hardware"
         />
@@ -52,7 +43,7 @@ const formattedDate = latestUpdate?.toLocaleDateString('en-US', {
       {saltwaterDynamics.length > 0 && (
         <CategorySection
           title="Saltwater & Plasma Dynamics"
-          description="Molecular interactions, physics modeling, and theoretical work"
+          description="Molecular interactions, physics modelling, and theoretical work."
           updates={saltwaterDynamics}
           category="saltwater-dynamics"
         />
@@ -61,7 +52,7 @@ const formattedDate = latestUpdate?.toLocaleDateString('en-US', {
       {reactiveSpecies.length > 0 && (
         <CategorySection
           title="Reactive Species in Saltwater"
-          description="Experimental data, reactions, measurements, and observations"
+          description="Experimental data, reactions, measurements, and observations."
           updates={reactiveSpecies}
           category="reactive-species"
         />
@@ -69,7 +60,7 @@ const formattedDate = latestUpdate?.toLocaleDateString('en-US', {
     </div>
 
     {sortedUpdates.length === 0 && (
-      <div class="empty-state">
+      <div class="empty-state" role="status" aria-live="polite">
         <p>No updates yet. The work begins soon.</p>
       </div>
     )}
@@ -77,58 +68,22 @@ const formattedDate = latestUpdate?.toLocaleDateString('en-US', {
 </Layout>
 
 <style>
-  .hero {
-    text-align: center;
-    margin-bottom: 6rem;
-    padding: 3rem 0 4rem 0;
+  .hero{
+    text-align:center; margin-bottom:5rem; padding:2.5rem 0 3.5rem;
   }
-
-  h1 {
-    font-size: 2.75rem;
-    font-weight: 500;
-    margin: 0 0 1.5rem 0;
-    color: #fff;
-    letter-spacing: -0.03em;
-    line-height: 1.2;
+  h1{
+    font-size:2.6rem; font-weight:700; margin:0 0 1rem; color:var(--text-1);
+    letter-spacing:-.03em; line-height:1.2;
   }
-
-  .subtitle {
-    font-size: 1.1rem;
-    color: #888;
-    max-width: 650px;
-    margin: 0 auto 2rem auto;
-    line-height: 1.7;
+  .subtitle{
+    font-size:1.08rem; color:var(--text-4); max-width:700px; margin:0 auto 1.25rem; line-height:1.7;
   }
+  .last-updated{ color:var(--muted); font-size:.9rem; margin:0; }
+  .categories{ margin-top:3rem; }
+  .empty-state{ text-align:center; padding:5rem 2rem; color:var(--muted); font-size:1.05rem; }
 
-  .last-updated {
-    color: #555;
-    font-size: 0.85rem;
-    margin: 0;
-  }
-
-  .categories {
-    margin-top: 4rem;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 6rem 2rem;
-    color: #555;
-    font-size: 1.05rem;
-  }
-
-  @media (max-width: 768px) {
-    .hero {
-      padding: 2rem 0 3rem 0;
-      margin-bottom: 4rem;
-    }
-
-    h1 {
-      font-size: 2rem;
-    }
-
-    .subtitle {
-      font-size: 1rem;
-    }
+  @media (max-width: 768px){
+    h1{ font-size:2rem; }
+    .subtitle{ font-size:1rem; }
   }
 </style>
