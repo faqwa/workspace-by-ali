@@ -50,6 +50,12 @@ Workspace is a two-layer, open-research ecosystem that bridges individual experi
 
 **Detailed Plan:** [Phase_1_Personal_Workspace_MVP.md](./Phase_1_Personal_Workspace_MVP.md)
 
+
+WE NEED TO ADD = ⚖️ Licensing & Attribution
+Workspace documentation and architecture files are shared under **CC BY-NC-SA 4.0**.  
+All referenced technologies (Astro, Supabase, etc.) remain under their respective open-source licenses.
+
+
 ---
 
 ### Phase 2: Commons Workspace Core (6-8 weeks) ⏳ AFTER PHASE 1

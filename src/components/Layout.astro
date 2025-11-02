@@ -1,22 +1,19 @@
 ---
-import { createSupabaseServer } from '../lib/supabaseServer';
+import type { User } from '@supabase/supabase-js';
 
 interface Props {
   title: string;
   description?: string;
   canonicalUrl?: string;
+  user?: User | null;
 }
 
 const {
   title,
   description = "Workspace by Ali — Active research and build logs",
-  canonicalUrl
+  canonicalUrl,
+  user = null
 } = Astro.props;
-
-// Check if user is authenticated (server-side with cookies)
-const supabase = createSupabaseServer(Astro.cookies);
-const { data: { session } } = await supabase.auth.getSession();
-const user = session?.user;
 
 const today = new Date();
 ---
@@ -246,13 +243,15 @@ const today = new Date();
 
     {user && (
       <script>
-        import { signOut } from '../lib/auth';
-
         const userButton = document.getElementById('user-menu-button');
         userButton?.addEventListener('click', async () => {
           if (confirm('Sign out?')) {
-            await signOut();
-            window.location.href = '/';
+            // Create a form and submit to the signout API
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/api/auth/signout';
+            document.body.appendChild(form);
+            form.submit();
           }
         });
       </script>

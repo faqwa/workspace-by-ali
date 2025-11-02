@@ -3,9 +3,12 @@ import Layout from '../components/Layout.astro';
 import CategorySection from '../components/CategorySection.astro';
 import { getCollection } from 'astro:content';
 
+// Get user from middleware (if authenticated)
+const user = Astro.locals.user;
+
 // Get all updates and sort by date (newest first)
 const allUpdates = await getCollection('updates');
-const sortedUpdates = allUpdates.sort((a, b) => 
+const sortedUpdates = allUpdates.sort((a, b) =>
   b.data.date.getTime() - a.data.date.getTime()
 );
 
@@ -23,7 +26,7 @@ const formattedDate = latestUpdate?.toLocaleDateString('en-US', {
 });
 ---
 
-<Layout title="Workspace by Ali">
+<Layout title="Workspace by Ali" user={user}>
   <div class="container">
     <header class="hero">
       <h1>What I'm Currently Working On</h1>

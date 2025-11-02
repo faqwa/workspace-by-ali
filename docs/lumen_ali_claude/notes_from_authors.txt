@@ -1,0 +1,33 @@
+⚙️ 02_Supabase_Vercel_Integration.md
+
+Verdict: ✅ Keep structure, but consider three refinements for precision and maintainability.
+
+1. Add a “Change Tracking” Header
+
+At the top, under the metadata block, include:
+
+_Change Log:_ v1.1 — Added Supabase schema and Edge Function scaffolds (Oct 2025)
+
+
+It future-proofs this file for versioned iterations (v1.2, v1.3, etc.).
+
+2. Clarify Edge Function Boundaries
+
+The document currently places all logic inside /functions/validate-submission.
+We could add a short “Function Overview Table” section before it:
+
+Function	Purpose	Trigger
+/validate-submission	Check schema + safety log before submission	POST from Personal Workspace
+/update-status	Approve/reject from Commons dashboard	Admin/Reviewer UI
+/sync-commons (future)	Sync verified data into public JSON	CRON or webhook
+
+That tiny table helps contributors orient faster.
+
+3. Add Schema Import Note
+
+Right now, streams.schema_url assumes JSON schemas exist but doesn’t explain where.
+Add a clarifying line:
+
+“Each stream references a JSON Schema stored under /storage/schemas/<stream_id>/schema.json, maintained by Commons admins. Edge Functions validate against these before accepting uploads.”
+
+Otherwise, the document is technically solid and ready for implementation — SQL syntax, policies, and architectural narrative are perfect.

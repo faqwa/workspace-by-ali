@@ -106,23 +106,14 @@ CREATE POLICY "Users can update own profile"
   FOR UPDATE
   USING (auth.uid() = id);
 
--- Admins can view all users
-CREATE POLICY "Admins can view all users"
-  ON users
-  FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM users
-      WHERE id = auth.uid()
-      AND role = 'admin'
-    )
-  );
-
 -- Allow inserting user profiles (for first-time auth)
 CREATE POLICY "Users can insert own profile"
   ON users
   FOR INSERT
   WITH CHECK (auth.uid() = id);
+
+-- NOTE: Admin functionality removed for MVP to avoid infinite recursion
+-- To add admin policies later, use a security definer function instead of direct SELECT
 
 -- ============================================================================
 -- PROJECTS TABLE POLICIES
@@ -245,17 +236,8 @@ CREATE POLICY "Users can update own submissions"
   FOR UPDATE
   USING (auth.uid() = user_id AND status = 'draft');
 
--- Reviewers and admins can update submission status
-CREATE POLICY "Reviewers can update status"
-  ON submissions
-  FOR UPDATE
-  USING (
-    EXISTS (
-      SELECT 1 FROM users
-      WHERE users.id = auth.uid()
-      AND users.role IN ('reviewer', 'admin')
-    )
-  );
+-- NOTE: Reviewer/admin policies removed for MVP to avoid infinite recursion
+-- Will add back in Phase 2 using security definer functions
 
 -- ============================================================================
 -- SAFETY LOGS TABLE POLICIES
@@ -273,17 +255,8 @@ CREATE POLICY "Users can create safety logs"
   FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
--- Admins can view all safety logs
-CREATE POLICY "Admins can view all safety logs"
-  ON safety_logs
-  FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM users
-      WHERE id = auth.uid()
-      AND role = 'admin'
-    )
-  );
+-- NOTE: Admin policies removed for MVP to avoid infinite recursion
+-- Will add back in Phase 2 using security definer functions
 
 -- ============================================================================
 -- VISUALIZATIONS TABLE POLICIES

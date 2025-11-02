@@ -1,8 +1,18 @@
 /**
- * Supabase Client Configuration
+ * Client-Side Supabase Client
  *
- * This file provides Supabase client instances for both browser and server contexts.
- * Uses the @supabase/ssr package for proper auth handling in Astro.
+ * IMPORTANT: This file is for CLIENT-SIDE use only!
+ *
+ * Usage Guidelines:
+ * - ✅ Use for: Public data queries from browser (e.g., fetching public projects)
+ * - ✅ Use for: Real-time subscriptions on client
+ * - ❌ DO NOT use for: Authentication (handled by API routes)
+ * - ❌ DO NOT use for: Protected data (use server-side supabaseServer.ts)
+ *
+ * For server-side operations (Astro pages, API routes):
+ * → Use createSupabaseServer(Astro.cookies) from supabaseServer.ts instead
+ *
+ * Auth is disabled on this client - all auth happens server-side via API routes.
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -19,33 +29,16 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 /**
- * Browser/Client-side Supabase client
- * Use this in .astro files and client-side scripts
+ * Client-side Supabase instance
+ *
+ * Configured for public queries only. Auth is disabled - handled by server.
  */
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
+    // Auth is handled server-side only
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+    persistSession: false,
+    flowType: 'pkce',
   },
 });
-
-/**
- * Server-side Supabase client (with service role key)
- * ONLY use this in API routes or server-side code
- * Has elevated privileges - use with caution
- */
-export function getSupabaseServer() {
-  const serviceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!serviceRoleKey) {
-    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY - required for server operations');
-  }
-
-  return createClient<Database>(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-}
