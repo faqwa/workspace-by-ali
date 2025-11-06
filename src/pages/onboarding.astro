@@ -1,0 +1,336 @@
+---
+import BaseLayout from '../components/layouts/BaseLayout.astro';
+import { createSupabaseServer } from '../lib/supabaseServer';
+
+// Get authenticated user
+const supabase = createSupabaseServer(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
+
+// Redirect to login if not authenticated
+if (!user) {
+  return Astro.redirect('/login');
+}
+
+// Check if GitHub is connected
+const { data: userRepo } = await supabase
+  .from('user_repos')
+  .select('*')
+  .eq('user_id', user.id)
+  .single();
+
+const githubConnected = !!userRepo && !!userRepo.github_token_encrypted;
+const repoForked = !!userRepo && userRepo.is_template_forked;
+
+// If fully onboarded, redirect to dashboard
+// (Commented out for now so you can test the flow multiple times)
+// if (githubConnected && repoForked) {
+//   return Astro.redirect('/projects');
+// }
+---
+
+<BaseLayout title="Welcome to Workspace">
+  <div class="min-h-screen bg-gradient-to-b from-base-200 to-base-300 py-12">
+    <div class="container mx-auto px-4 max-w-3xl">
+
+      <!-- Welcome Header -->
+      <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold text-base-content mb-4">
+          Welcome to Workspace! 👋
+        </h1>
+        <p class="text-xl text-base-content/70">
+          Let's set up your personal research workspace in just a few steps.
+        </p>
+      </div>
+
+      <!-- Progress Steps -->
+      <ul class="steps steps-vertical lg:steps-horizontal w-full mb-12">
+        <li class="step step-primary">Sign In</li>
+        <li class:list={["step", githubConnected && "step-primary"]}>Connect GitHub</li>
+        <li class:list={["step", repoForked && "step-primary"]}>Create Workspace</li>
+        <li class="step">Get Started</li>
+      </ul>
+
+      <!-- Step 1: Authentication (Always Complete) -->
+      <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="card-title text-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Step 1: Sign In
+              </h2>
+              <p class="text-base-content/70 mt-2">
+                You're already signed in as <strong>{user.email}</strong>
+              </p>
+            </div>
+            <div class="badge badge-success badge-lg">Complete</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Connect GitHub -->
+      <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="card-title text-2xl">
+              {githubConnected ? (
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              )}
+              Step 2: Connect GitHub
+            </h2>
+            {githubConnected && (
+              <div class="badge badge-success badge-lg">Complete</div>
+            )}
+          </div>
+
+          {!githubConnected ? (
+            <div>
+              <p class="text-base-content/70 mb-4">
+                Connect your GitHub account to enable workspace features:
+              </p>
+              <ul class="list-disc list-inside text-base-content/70 space-y-2 mb-6">
+                <li>Create your personal workspace repository</li>
+                <li>Edit content using Git-backed CMS</li>
+                <li>Version control for all your work</li>
+                <li>Collaborate and share with others</li>
+              </ul>
+
+              <div class="alert alert-info mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="text-sm">
+                  <p><strong>Permissions Required:</strong></p>
+                  <ul class="list-disc list-inside mt-1">
+                    <li><code>repo</code> - Access to create and manage repositories</li>
+                    <li><code>read:user</code> - Read your GitHub profile</li>
+                  </ul>
+                </div>
+              </div>
+
+              <a href="/api/auth/github-connect" class="btn btn-primary btn-lg w-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                Connect GitHub Account
+              </a>
+            </div>
+          ) : (
+            <div>
+              <p class="text-success mb-2">✅ GitHub account connected!</p>
+              <p class="text-base-content/70 text-sm">
+                Connected as: <strong>{userRepo.repo_owner}</strong>
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <!-- Step 3: Create Workspace -->
+      <div class="card bg-base-100 shadow-xl mb-6" class:list={[!githubConnected && "opacity-50"]}>
+        <div class="card-body">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="card-title text-2xl">
+              {repoForked ? (
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" class:list={[githubConnected ? "text-warning" : "text-base-content/30"]} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              )}
+              Step 3: Create Your Workspace
+            </h2>
+            {repoForked && (
+              <div class="badge badge-success badge-lg">Complete</div>
+            )}
+          </div>
+
+          {!githubConnected ? (
+            <div class="alert alert-warning">
+              <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+              <span>Please connect GitHub first</span>
+            </div>
+          ) : !repoForked ? (
+            <div>
+              <p class="text-base-content/70 mb-4">
+                Create your personal workspace repository on GitHub:
+              </p>
+              <ul class="list-disc list-inside text-base-content/70 space-y-2 mb-6">
+                <li>Repository name: <code>workspace-{userRepo.repo_owner}</code></li>
+                <li>Includes example projects and templates</li>
+                <li>Separate <code>main</code> and <code>draft</code> branches</li>
+                <li>Fully yours - you control the code!</li>
+              </ul>
+
+              <div id="fork-status" class="hidden mb-4"></div>
+
+              <button
+                id="create-workspace-btn"
+                class="btn btn-success btn-lg w-full"
+                onclick="createWorkspace()"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                </svg>
+                Create My Workspace
+              </button>
+
+              <p class="text-xs text-base-content/50 text-center mt-2">
+                This will create a new repository on your GitHub account
+              </p>
+            </div>
+          ) : (
+            <div>
+              <p class="text-success mb-2">✅ Workspace created successfully!</p>
+              <p class="text-base-content/70 mb-4">
+                Your workspace repository: <a href={userRepo.repo_url} target="_blank" class="link link-primary">{userRepo.repo_name}</a>
+              </p>
+              <div class="alert alert-success">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>You're all set! Click below to start using Workspace.</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <!-- Step 4: Get Started -->
+      {repoForked && (
+        <div class="card bg-base-100 shadow-xl mb-6">
+          <div class="card-body text-center">
+            <h2 class="card-title text-2xl justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+              You're All Set! 🎉
+            </h2>
+
+            <p class="text-base-content/70 mb-6">
+              Your workspace is ready. Start documenting your research journey!
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div class="stats shadow">
+                <div class="stat">
+                  <div class="stat-title">Quick Actions</div>
+                  <div class="stat-value text-primary text-2xl">Create</div>
+                  <div class="stat-desc">Projects & Updates</div>
+                </div>
+              </div>
+              <div class="stats shadow">
+                <div class="stat">
+                  <div class="stat-title">Content Management</div>
+                  <div class="stat-value text-secondary text-2xl">Publish</div>
+                  <div class="stat-desc">Draft → Main</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4 justify-center">
+              <a href="/projects" class="btn btn-primary btn-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                Go to Projects
+              </a>
+              <a href={userRepo.repo_url} target="_blank" class="btn btn-outline btn-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                View on GitHub
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <!-- Help Section -->
+      <div class="card bg-base-200 shadow mb-6">
+        <div class="card-body">
+          <h3 class="text-lg font-semibold mb-2">Need Help?</h3>
+          <div class="text-sm text-base-content/70 space-y-2">
+            <p>
+              <strong>What is Workspace?</strong> A Git-first platform for open research documentation.
+            </p>
+            <p>
+              <strong>Why GitHub?</strong> Your data lives in your repository - you own and control it completely.
+            </p>
+            <p>
+              <strong>Questions?</strong> Check out the <a href="/docs" class="link">documentation</a> or visit the test dashboard at <a href="/test-git-apis" class="link">/test-git-apis</a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script is:inline>
+    async function createWorkspace() {
+      const btn = document.getElementById('create-workspace-btn');
+      const statusDiv = document.getElementById('fork-status');
+
+      btn.disabled = true;
+      btn.classList.add('loading');
+
+      statusDiv.innerHTML = `
+        <div class="alert alert-info">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span>Creating your workspace... This may take 10-30 seconds.</span>
+        </div>
+      `;
+      statusDiv.classList.remove('hidden');
+
+      try {
+        const response = await fetch('/api/repo/fork', { method: 'POST' });
+        const data = await response.json();
+
+        if (data.success) {
+          statusDiv.innerHTML = `
+            <div class="alert alert-success">
+              <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <div>
+                <p class="font-bold">Success!</p>
+                <p class="text-sm">Workspace created: ${data.repo_name}</p>
+              </div>
+            </div>
+          `;
+
+          // Reload page after 2 seconds to show completion state
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          statusDiv.innerHTML = `
+            <div class="alert alert-error">
+              <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <div>
+                <p class="font-bold">Error</p>
+                <p class="text-sm">${data.error || data.message}</p>
+              </div>
+            </div>
+          `;
+          btn.disabled = false;
+          btn.classList.remove('loading');
+        }
+      } catch (error) {
+        statusDiv.innerHTML = `
+          <div class="alert alert-error">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>Failed to create workspace. Please try again.</span>
+          </div>
+        `;
+        btn.disabled = false;
+        btn.classList.remove('loading');
+      }
+    }
+  </script>
+</BaseLayout>

@@ -1,0 +1,242 @@
+---
+import DashboardLayout from '../../components/layouts/DashboardLayout.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb';
+import { createSupabaseServer } from '../../lib/supabaseServer';
+import { fetchDocFromGit, checkContentAccess } from '../../lib/github';
+import { decryptToken } from '../../lib/tokenEncryption';
+import { formatDistanceToNow } from 'date-fns';
+
+// Get doc slug from URL
+const { id: docSlug } = Astro.params;
+
+// Get user
+const supabase = createSupabaseServer(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
+
+if (!docSlug) {
+  return Astro.redirect('/');
+}
+
+// Fetch user's GitHub repo info
+const { data: userRepo, error: repoError } = await supabase
+  .from('user_repos')
+  .select('repo_owner, repo_name, github_token_encrypted, user_id')
+  .eq('user_id', user?.id || '')
+  .single();
+
+if (repoError || !userRepo || !userRepo.github_token_encrypted) {
+  // User hasn't connected GitHub yet - redirect to onboarding
+  if (!user) {
+    return Astro.redirect('/login');
+  }
+  return Astro.redirect('/onboarding');
+}
+
+// Decrypt GitHub token
+let githubToken: string;
+try {
+  githubToken = decryptToken(userRepo.github_token_encrypted);
+} catch (error) {
+  console.error('[Doc Page] Token decryption failed:', error);
+  return Astro.redirect('/onboarding');
+}
+
+// Fetch doc from GitHub
+const doc = await fetchDocFromGit(
+  githubToken,
+  userRepo.repo_owner,
+  userRepo.repo_name,
+  docSlug
+);
+
+if (!doc) {
+  return Astro.redirect('/');
+}
+
+// Check access control
+const isOwner = user?.id === userRepo.user_id;
+const accessCheck = checkContentAccess(doc.visibility, isOwner, false);
+
+if (!accessCheck.allowed) {
+  // TODO: Show safety modal for gated content
+  return Astro.redirect('/');
+}
+
+// Format dates
+const publishedDate = new Date(doc.publishDate);
+const publishedAgo = formatDistanceToNow(publishedDate, { addSuffix: true });
+const updatedDate = new Date(doc.lastUpdated);
+const updatedAgo = formatDistanceToNow(updatedDate, { addSuffix: true });
+
+// Extract YouTube video ID if videoUrl exists
+let youtubeId: string | null = null;
+if (doc.videoUrl) {
+  const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = doc.videoUrl.match(youtubeRegex);
+  if (match) {
+    youtubeId = match[1];
+  }
+}
+---
+
+<DashboardLayout title={`${doc.title} - Documentation`}>
+  <!-- Breadcrumb -->
+  <Breadcrumb
+    client:load
+    items={[
+      { label: 'Dashboard', href: '/' },
+      { label: 'Documentation', href: '/docs' },
+      { label: doc.title }
+    ]}
+  />
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+    <div class="flex-1">
+      <div class="flex items-center gap-3 mb-2">
+        <h1 class="text-3xl font-bold text-base-content">
+          {doc.title}
+        </h1>
+
+        <!-- Visibility badge -->
+        {doc.visibility === 'public' ? (
+          <div class="tooltip" data-tip="Public document">
+            <div class="badge badge-success gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+              </svg>
+              Public
+            </div>
+          </div>
+        ) : doc.visibility === 'gated' ? (
+          <div class="tooltip" data-tip="Safety acknowledgment required">
+            <div class="badge badge-warning gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+              Gated
+            </div>
+          </div>
+        ) : (
+          <div class="tooltip" data-tip="Private document">
+            <div class="badge badge-ghost gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+              Private
+            </div>
+          </div>
+        )}
+
+        <!-- Category badge -->
+        {doc.category && (
+          <div class="badge badge-primary badge-outline capitalize">
+            {doc.category}
+          </div>
+        )}
+      </div>
+
+      <div class="flex items-center gap-4 text-sm text-base-content/60">
+        {doc.author && (
+          <p class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+            </svg>
+            {doc.author}
+          </p>
+        )}
+        <p class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-4 h-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Published {publishedAgo}
+        </p>
+        {doc.publishDate !== doc.lastUpdated && (
+          <p class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+            Updated {updatedAgo}
+          </p>
+        )}
+      </div>
+    </div>
+
+    <!-- Action buttons (only for owner) -->
+    {isOwner && (
+      <div class="flex gap-2">
+        <a href={`/keystatic/collection/docs/item/${docSlug}`} class="btn bg-[#22c55e] hover:bg-[#16a34a] text-white border-0">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-5 h-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+          </svg>
+          Edit in Keystatic
+        </a>
+        <a href={`https://github.com/${userRepo.repo_owner}/${userRepo.repo_name}/tree/main/content/docs/${docSlug}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-5 h-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+          </svg>
+          View on GitHub
+        </a>
+      </div>
+    )}
+  </div>
+
+  <!-- Description -->
+  {doc.description && (
+    <div class="alert mb-8">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-6 h-6 flex-shrink-0">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+      </svg>
+      <span>{doc.description}</span>
+    </div>
+  )}
+
+  <!-- YouTube Video Embed -->
+  {youtubeId && (
+    <div class="card bg-base-100 shadow mb-8">
+      <div class="card-body">
+        <h2 class="card-title text-xl mb-3">Video</h2>
+        <div class="aspect-video">
+          <iframe
+            class="w-full h-full rounded-lg"
+            src={`https://www.youtube.com/embed/${youtubeId}`}
+            title="YouTube video"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </div>
+    </div>
+  )}
+
+  <!-- Document Content (Markdown Body) -->
+  {doc.body && (
+    <div class="card bg-base-100 shadow mb-8">
+      <div class="card-body">
+        <div class="prose max-w-none">
+          <div set:html={doc.body} />
+        </div>
+      </div>
+    </div>
+  )}
+
+  <!-- Tags -->
+  {doc.tags && doc.tags.length > 0 && (
+    <div class="flex gap-2 mb-8 flex-wrap">
+      {doc.tags.map((tag) => (
+        <div class="badge badge-lg badge-outline">{tag}</div>
+      ))}
+    </div>
+  )}
+
+  <!-- Related Project (if linked) -->
+  {doc.projectSlug && (
+    <div class="alert alert-info">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-6 h-6 flex-shrink-0">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+      </svg>
+      <span>This document is related to <a href={`/projects/${doc.projectSlug}`} class="link">project: {doc.projectSlug}</a></span>
+    </div>
+  )}
+</DashboardLayout>

@@ -25,7 +25,7 @@ export const GET: APIRoute = async ({ url, cookies }) => {
 
   try {
     // Get query parameters
-    const type = url.searchParams.get('type'); // project, update, stream
+    const type = url.searchParams.get('type'); // project, update, subproject
     const projectId = url.searchParams.get('project_id');
     const limit = parseInt(url.searchParams.get('limit') || '50');
     const offset = parseInt(url.searchParams.get('offset') || '0');
@@ -35,10 +35,10 @@ export const GET: APIRoute = async ({ url, cookies }) => {
       .from('activities')
       .select('*, projects(name)', { count: 'exact' })
       .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false});
 
     // Apply filters
-    if (type && ['project', 'update', 'stream'].includes(type)) {
+    if (type && ['project', 'update', 'subproject'].includes(type)) {
       query = query.eq('type', type);
     }
 
@@ -129,8 +129,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       return apiError('Content is too long (max 5000 characters)', 400, 'INVALID_INPUT');
     }
 
-    if (!type || !['project', 'update', 'stream'].includes(type)) {
-      return apiError('Type must be one of: project, update, stream', 400, 'INVALID_INPUT');
+    if (!type || !['project', 'update', 'subproject'].includes(type)) {
+      return apiError('Type must be one of: project, update, subproject', 400, 'INVALID_INPUT');
     }
 
     // If project_id is provided, verify it exists and user owns it

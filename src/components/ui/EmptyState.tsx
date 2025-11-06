@@ -1,3 +1,5 @@
+import { Button } from './Button';
+
 interface EmptyStateProps {
   icon?: React.ReactNode;
   title: string;
@@ -23,13 +25,13 @@ export default function EmptyState({ icon, title, description, action }: EmptySt
       )}
       {action && (
         action.href ? (
-          <a href={action.href} className="btn bg-[#22c55e] hover:bg-[#16a34a] text-white border-0">
-            {action.label}
+          <a href={action.href}>
+            <Button variant="primary">{action.label}</Button>
           </a>
         ) : (
-          <button onClick={action.onClick} className="btn bg-[#22c55e] hover:bg-[#16a34a] text-white border-0">
+          <Button onClick={action.onClick} variant="primary">
             {action.label}
-          </button>
+          </Button>
         )
       )}
     </div>

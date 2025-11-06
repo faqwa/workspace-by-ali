@@ -3,6 +3,10 @@
 **Timeline:** TBD (Post-Launch Feature)
 **Goal:** Connect multiple Commons nodes and enable cross-project discovery
 
+**⚠️ DISTANT FUTURE (Nov 6, 2025):** Federation features are very far out. Focus is on self-hosted personal workspaces first, then reader accounts, then commons, then this.
+
+**📖 See updated roadmap:** [00_Master_Roadmap.md](./00_Master_Roadmap.md)
+
 ---
 
 ## Vision

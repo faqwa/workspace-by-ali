@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from '../../components/layouts/DashboardLayout.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb';
 import { createSupabaseServer } from '../../lib/supabaseServer';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -58,13 +59,14 @@ const getTypeBadgeClass = (type: string) => {
 
 <DashboardLayout title={`${activity.title} - Workspace`}>
   <!-- Breadcrumb -->
-  <div class="text-sm breadcrumbs mb-4">
-    <ul>
-      <li><a href="/" class="text-base-content/60 hover:text-primary">Dashboard</a></li>
-      <li><a href="/updates" class="text-base-content/60 hover:text-primary">Updates</a></li>
-      <li class="text-base-content">{activity.title}</li>
-    </ul>
-  </div>
+  <Breadcrumb
+    client:load
+    items={[
+      { label: 'Dashboard', href: '/' },
+      { label: 'Updates', href: '/updates' },
+      { label: activity.title }
+    ]}
+  />
 
   <!-- Header -->
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">

@@ -1,87 +1,145 @@
 # Workspace: Master Development Roadmap
 
-**Project:** Workspace - Open Research Ecosystem
+**Project:** Workspace by Ali - Open Research Ecosystem
 **Created:** 2025-10-22
-**Status:** Planning Complete, Ready for Phase 1
+**Last Updated:** 2025-11-06 (Architecture Refactoring)
+**Status:** Phase 1A In Progress (Self-Hosted Owner MVP)
+
+**⚠️ MAJOR UPDATE (Nov 6, 2025):** Architecture refactored from multi-tenant to self-hosted deployment model.
+See [SESSION_HANDOFF_Nov6_2025_Architecture_Refactoring.md](../SESSION_HANDOFF_Nov6_2025_Architecture_Refactoring.md) for full context.
 
 ---
 
 ## Project Vision
 
-Workspace is a two-layer, open-research ecosystem that bridges individual experimentation with verified collective knowledge. It enables researchers to work openly, safely, and collaboratively while maintaining rigor and recognition.
+Workspace is a self-hosted, open-research platform that enables researchers to own their data while collaborating openly. It supports three tiers of engagement: lightweight readers, self-hosted researchers, and commons contributors.
 
-**Personal Workspace** 🌱 - Your personal lab bench on the web
-**Commons Workspace** 🌳 - The verified forest where knowledge becomes public good
+**Personal Workspace** 🌱 - Your self-hosted lab bench (each researcher deploys their own)
+**Commons Workspace** 🌳 - Organizational workspaces for verified collective knowledge (Arc^ model)
+
+**Deployment Model:** Self-hosted (each person deploys their own workspace on Vercel)
+**User Tiers:** Owners (workspace deployers), Readers (lightweight guests), Commons Contributors
 
 ---
 
 ## Technology Stack
 
-| Component | Technology | Reason |
-|-----------|-----------|--------|
-| Frontend | Astro 5 + Astrowind | Fast, content-focused, component-based |
-| Database | Supabase Postgres | Free tier, RLS, real-time |
-| Auth | Supabase Auth | GitHub OAuth, magic links |
-| Storage | Supabase Storage | Signed URLs, free tier |
-| Backend | Supabase Edge Functions | Serverless, TypeScript |
-| CMS | DecapCMS | Git-based, user-friendly |
-| Hosting | Vercel | Free, fast deploys |
-| Visualization | Python (FastAPI) | Plotly, Matplotlib |
-| Validation | Zod | Type-safe schemas |
+| Component | Technology | Reason | Status |
+|-----------|-----------|--------|--------|
+| Frontend | Astro 5 + Astrowind | Fast, content-focused, component-based | ✅ Working |
+| Database | Supabase Postgres | Auth, metadata cache, safety logs only | ✅ Working |
+| Content Storage | User-owned GitHub repos | Data ownership, version control, portability | ✅ Working |
+| Auth | Supabase Auth | GitHub OAuth (primary), magic links (readers) | ✅ Working |
+| GitHub Integration | GitHub OAuth (secondary) | Repo access for owner, fork/PR workflow | ✅ Working |
+| CMS | **Keystatic** | Git-first, Astro integration, self-hosted friendly | ✅ Working |
+| Hosting | Vercel (self-hosted) | Each user deploys their own instance | ✅ Working |
+| Token Encryption | AES-256-GCM | Secure GitHub token storage | ✅ Working |
+| Visualization | Python (FastAPI) | Plotly, Matplotlib | ⏳ Future |
+| Validation | Zod | Type-safe schemas | ✅ Working |
+
+**Key Changes:**
+- ~~DecapCMS~~ → **Keystatic** (better Astro integration, hierarchical collections)
+- ~~Multi-tenant deployment~~ → **Self-hosted** (each user deploys their own)
+- ~~Supabase for content~~ → **GitHub repos for content** (user data ownership)
 
 ---
 
 ## Development Phases
 
-### Phase 1: Personal Workspace MVP (6-8 weeks) ✅ READY TO START
+### Phase 1: Self-Hosted Owner MVP (Refactored Nov 6, 2025) 🟡 IN PROGRESS
 
-**Goal:** Ali can use workspace for ArcUp plasma research
+**Goal:** Ali can deploy and use his own workspace for ArcUp plasma research
 
-**Key Features:**
-- Multi-project management
-- Content creation with DecapCMS
-- Safety onboarding and gating
-- Public profile pages
-- Mobile-optimized
+**Deployment Model:** Self-hosted on Vercel (owner deploys their own instance)
 
-**Deliverable:** Fully functional Personal Workspace at `workspace.xbyali.page`
+**Phase 1A: Owner MVP** (~60% complete)
+- ✅ Database schema (owner/reader roles, acknowledgments, workspace settings)
+- ✅ Middleware (role detection, owner-only route protection)
+- ✅ Environment config (.env.example for self-hosting)
+- ✅ Git infrastructure (fork, publish, read content from GitHub)
+- ✅ Keystatic CMS (content editing)
+- ⏳ Owner setup wizard (in progress)
+- ⏳ Rename streams → sub-projects
+- ⏳ Private/public repo visibility toggle
+- ⏳ Vercel Deploy Button
 
-**Status:** Planning complete, architecture finalized, ready to begin implementation
+**Phase 1B: Content Management**
+- ⏳ Hierarchical sub-projects (parent/child relationships)
+- ⏳ Sub-project tree UI
+- ⏳ Breadcrumb navigation
 
-**Detailed Plan:** [Phase_1_Personal_Workspace_MVP.md](./Phase_1_Personal_Workspace_MVP.md)
+**Phase 1C: Deployment & Documentation**
+- ⏳ Self-hosting guide (step-by-step)
+- ⏳ Production testing
+- ⏳ Known issues documentation
 
+**Deliverable:** Fully functional self-hosted workspace at `alis-workspace.vercel.app`
 
-WE NEED TO ADD = ⚖️ Licensing & Attribution
-Workspace documentation and architecture files are shared under **CC BY-NC-SA 4.0**.  
+**Status:** Foundation complete, testing and setup wizard in progress
+
+**Current Progress:** ~30% of overall vision, ~60% of Phase 1A
+
+**Detailed Plan:** [Phase_1_Personal_Workspace_MVP.md](./Phase_1_Personal_Workspace_MVP.md) *(needs update for self-hosted model)*
+
+---
+
+⚖️ **Licensing & Attribution**
+Workspace documentation and architecture files are shared under **CC BY-NC-SA 4.0**.
 All referenced technologies (Astro, Supabase, etc.) remain under their respective open-source licenses.
 
 
 ---
 
-### Phase 2: Commons Workspace Core (6-8 weeks) ⏳ AFTER PHASE 1
+### Phase 2: Reader Accounts & Collaboration (Deferred) ⏳ AFTER PHASE 1
 
-**Goal:** ArcUp Commons can receive and verify submissions
+**Goal:** Enable lightweight reader accounts and distributed collaboration
 
 **Key Features:**
-- Submission pipeline (Personal → Commons)
+- Reader signup flow (magic link, Google OAuth)
+- Safety & license acknowledgment modals
+- Content gating (hide content until acknowledged)
+- Suggestions/comments system (moderated by owner)
+- Fork & submit PR workflow
+- Contributors auto-display from Git history
+- PR tracking UI
+
+**Deliverable:** Owners can enable reader accounts; researchers can collaborate via GitHub
+
+**Prerequisites:**
+- Phase 1 (Owner MVP) completed
+- Owner workspace tested and stable
+- At least one self-hosted workspace deployed
+
+**Status:** Deferred until owner experience is solid
+
+---
+
+### Phase 3: Commons Workspace (Arc^ Model) ⏳ FUTURE
+
+**Goal:** Arc^ Commons can receive and verify submissions from distributed workspaces
+
+**Key Features:**
+- Commons Safety Registry (shared acknowledgment tracking)
+- Submit to Commons workflow (from personal workspace)
 - Admin review dashboard
 - Schema validation system
 - Manual approval workflow
 - Contributor recognition
 - Public verified content site
 
-**Deliverable:** Working Commons at `arcup.xbyali.page`
+**Deliverable:** Working Commons at `arc-commons.vercel.app`
 
 **Prerequisites:**
-- Phase 1 completed
-- At least one active user
-- Test data ready
+- Phase 1 & 2 completed
+- Multiple self-hosted workspaces active
+- Collaboration workflow tested
+- Governance model defined
 
-**Detailed Plan:** [Phase_2_Commons_Workspace_Core.md](./Phase_2_Commons_Workspace_Core.md)
+**Detailed Plan:** [Phase_2_Commons_Workspace_Core.md](./Phase_2_Commons_Workspace_Core.md) *(needs renaming to Phase_3)*
 
 ---
 
-### Phase 3: Data Visualization (4-6 weeks) ⏳ AFTER PHASE 2
+### Phase 4: Data Visualization (4-6 weeks) ⏳ FUTURE
 
 **Goal:** Process and display experimental data beautifully
 

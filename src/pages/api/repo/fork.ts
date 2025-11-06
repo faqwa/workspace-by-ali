@@ -213,7 +213,7 @@ export const GET: APIRoute = async ({ request, cookies }) => {
   // Check user's fork status
   const { data: userRepo, error: repoError } = await supabase
     .from('user_repos')
-    .select('is_template_forked, repo_url, repo_name, repo_owner')
+    .select('is_template_forked, repo_url, repo_name, repo_owner, github_token_encrypted')
     .eq('user_id', user.id)
     .single();
 

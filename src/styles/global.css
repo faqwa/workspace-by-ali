@@ -88,8 +88,38 @@
 }
 
 /* ===== DARK THEME ===== */
+/* Use data-theme attribute for manual theme switching */
+[data-theme="workspace-dark"] {
+  /* Background layers */
+  --bg: #0a0a0a;
+  --surface-1: #0f0f0f;
+  --surface-2: #131313;
+  --surface-3: #161616;
+  --elev-1: #0f0f0f;
+  --elev-2: #131313;
+
+  /* Borders */
+  --border-subtle: #202020;
+  --border-default: #252525;
+  --border-strong: #353535;
+  --border-1: #131313;
+  --border-2: #202020;
+
+  /* Text hierarchy */
+  --text-primary: #ffffff;
+  --text-secondary: #e0e0e0;
+  --text-muted: #888888;
+  --text-disabled: #555555;
+
+  /* Shadows adjusted for dark backgrounds */
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+/* Also support system preference as fallback when no theme is set */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     /* Background layers */
     --bg: #0a0a0a;
     --surface-1: #0f0f0f;

@@ -1,7 +1,11 @@
-# Phase 3: Data Visualization Pipeline
+# Phase 3: Data Visualization Pipeline (Now Phase 4)
 
-**Timeline:** 4-6 weeks
+**Timeline:** 4-6 weeks (original estimate)
 **Goal:** Process and display experimental data with beautiful visualizations
+
+**⚠️ PHASE SHIFTED (Nov 6, 2025):** Phases renumbered after architecture refactoring. This is now Phase 4 (Data Visualization comes after Commons).
+
+**📖 See updated roadmap:** [00_Master_Roadmap.md](./00_Master_Roadmap.md)
 
 ---
 

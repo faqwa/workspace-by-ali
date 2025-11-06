@@ -111,8 +111,8 @@ export const PUT: APIRoute = async ({ params, request, cookies }) => {
       return apiError('Content is too long (max 5000 characters)', 400, 'INVALID_INPUT');
     }
 
-    if (type !== undefined && !['project', 'update', 'stream'].includes(type)) {
-      return apiError('Type must be one of: project, update, stream', 400, 'INVALID_INPUT');
+    if (type !== undefined && !['project', 'update', 'subproject'].includes(type)) {
+      return apiError('Type must be one of: project, update, subproject', 400, 'INVALID_INPUT');
     }
 
     // If project_id is being updated, verify it exists and user owns it

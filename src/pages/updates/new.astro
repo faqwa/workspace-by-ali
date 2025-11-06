@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from '../../components/layouts/DashboardLayout.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb';
 import { createSupabaseServer } from '../../lib/supabaseServer';
 
 // Get user
@@ -19,14 +20,18 @@ const { data: userProjects } = await supabase
 ---
 
 <DashboardLayout title="New Update - Workspace">
+  <!-- Breadcrumb -->
+  <Breadcrumb
+    client:load
+    items={[
+      { label: 'Dashboard', href: '/' },
+      { label: 'Updates', href: '/updates' },
+      { label: 'New Update' }
+    ]}
+  />
+
   <!-- Page Header -->
   <div class="mb-8">
-    <div class="flex items-center gap-2 text-sm breadcrumbs mb-4">
-      <ul>
-        <li><a href="/updates">Updates</a></li>
-        <li>New Update</li>
-      </ul>
-    </div>
     <h1 class="text-3xl font-bold text-base-content">
       Share an Update
     </h1>

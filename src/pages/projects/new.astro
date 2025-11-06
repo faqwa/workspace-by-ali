@@ -1,5 +1,6 @@
 ---
 import DashboardLayout from '../../components/layouts/DashboardLayout.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb';
 import { createSupabaseServer } from '../../lib/supabaseServer';
 
 // Get user
@@ -12,14 +13,18 @@ if (!user) {
 ---
 
 <DashboardLayout title="New Project - Workspace">
+  <!-- Breadcrumb -->
+  <Breadcrumb
+    client:load
+    items={[
+      { label: 'Dashboard', href: '/' },
+      { label: 'Projects', href: '/projects' },
+      { label: 'New Project' }
+    ]}
+  />
+
   <!-- Page Header -->
   <div class="mb-8">
-    <div class="flex items-center gap-2 text-sm breadcrumbs mb-4">
-      <ul>
-        <li><a href="/projects">Projects</a></li>
-        <li>New Project</li>
-      </ul>
-    </div>
     <h1 class="text-3xl font-bold text-base-content">
       Create New Project
     </h1>
@@ -129,7 +134,7 @@ if (!user) {
         <li>• Use clear, descriptive titles that explain the purpose</li>
         <li>• Add context in the description to help collaborators understand</li>
         <li>• Start with private visibility until you're ready to share</li>
-        <li>• Projects help you organize updates into meaningful streams</li>
+        <li>• Projects help you organize updates into meaningful sub-projects</li>
       </ul>
     </div>
   </div>

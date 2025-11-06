@@ -1,7 +1,16 @@
-# Phase 2: Commons Workspace Core
+# Phase 2: Commons Workspace Core (Now Phase 3)
 
-**Timeline:** 6-8 weeks
+**Timeline:** 6-8 weeks (original estimate)
 **Goal:** ArcUp Commons can receive, verify, and publish submissions from Personal Workspaces
+
+**⚠️ OUTDATED & PHASE SHIFTED (Nov 6, 2025):** Architecture refactored to self-hosted model. Commons features moved to Phase 3. Phase 2 is now Reader Accounts & Collaboration.
+
+**📖 See updated roadmap:**
+- [00_Master_Roadmap.md](./00_Master_Roadmap.md) - Updated phases
+- Phase 2 (New): Reader Accounts & Collaboration
+- Phase 3 (New): Commons Workspace (this content)
+
+**This document needs rewriting for self-hosted Arc^ model.**
 
 ---
 

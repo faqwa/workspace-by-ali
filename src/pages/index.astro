@@ -2,6 +2,7 @@
 import DashboardLayout from '../components/layouts/DashboardLayout.astro';
 import StatCard from '../components/ui/StatCard';
 import ActivityLog from '../components/ui/ActivityLog';
+import PublishWidget from '../components/ui/PublishWidget';
 import { createSupabaseServer } from '../lib/supabaseServer';
 
 // Get user
@@ -28,8 +29,8 @@ const { data: activities } = await supabase
   .order('created_at', { ascending: false })
   .limit(10);
 
-const { data: streams } = await supabase
-  .from('streams')
+const { data: subprojects } = await supabase
+  .from('subprojects')
   .select('id, project_id')
   .in('project_id', (projects || []).map(p => p.id));
 
@@ -37,7 +38,7 @@ const { data: streams } = await supabase
 const stats = {
   projects: projects?.length || 0,
   updates: activities?.length || 0,
-  streams: streams?.length || 0,
+  subProjects: subprojects?.length || 0,
   collaborators: 0, // TODO: Implement collaborators feature
 };
 
@@ -81,9 +82,9 @@ const recentActivities = (activities || []).slice(0, 5).map((activity) => ({
 
     <StatCard
       client:load
-      title="Streams"
-      value={stats.streams}
-      description="Active streams"
+      title="Sub-Projects"
+      value={stats.subProjects}
+      description="Active sub-projects"
     />
 
     <StatCard
@@ -138,6 +139,9 @@ const recentActivities = (activities || []).slice(0, 5).map((activity) => ({
           </div>
         </div>
       </div>
+
+      <!-- Publish Status -->
+      <PublishWidget client:load />
 
       <!-- Tips Card -->
       <div class="card bg-[#22c55e] text-white">

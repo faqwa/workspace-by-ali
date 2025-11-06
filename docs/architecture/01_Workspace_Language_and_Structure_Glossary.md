@@ -1,75 +1,192 @@
-# Workspace Language and Structure Glossary (v1)
+# Workspace Language and Structure Glossary (v2)
 
 **Authors:** Ali · Lumen · Claude
 **Date:** 2025-10-22
+**Last Updated:** 2025-11-06 (Architecture Refactoring)
 **Purpose:** Unified terminology and naming conventions for the Workspace ecosystem to ensure clarity and consistency across development, documentation, and interface design.
+
+**⚠️ MAJOR UPDATE (Nov 6, 2025):** Architecture refactored to self-hosted deployment model with owner/reader roles. "Streams" renamed to "Sub-Projects" for clarity.
 
 ---
 
-## 1. Core Concepts
+## 1. Deployment Model
 
-### Commons Workspace
-**Definition:** The verified, project-level environment that represents an entity like ArcUp, Remote Sensing, or any collective research effort. It is the custodian of integrity — where all user contributions flow into for review, validation, and public release.
+### Self-Hosted Architecture
+**Definition:** Each researcher deploys their own independent workspace instance on their own Vercel account. There is no centralized multi-tenant deployment.
 
 **Key Traits:**
+- User owns their deployment, data, and infrastructure
+- Each workspace has ONE owner (the person who deployed it)
+- Owner can optionally enable reader (guest) accounts
+- Content lives in user-owned GitHub repositories
+- Supabase used only for: Auth, metadata cache, safety logs
+- Full data portability (export, fork, migrate)
+
+**Examples:**
+- Ali deploys: `alis-workspace.vercel.app` (Ali's Vercel account)
+- Sarah deploys: `sarahs-workspace.vercel.app` (Sarah's Vercel account)
+- Arc^ deploys: `arc-commons.vercel.app` (Arc^ org Vercel account)
+
+---
+
+## 2. User Tiers
+
+### Owner (Workspace Deployer)
+**Definition:** The person who deployed the workspace. Has full control over their instance.
+
+**Key Traits:**
+- First user to deploy automatically becomes owner
+- Full access to all features: Keystatic, settings, repo management
+- Can enable/disable reader accounts
+- Can moderate reader suggestions
+- Owns the deployment infrastructure and costs
+
+### Reader (Lightweight Guest)
+**Definition:** A guest account on someone else's workspace, created to access gated content.
+
+**Key Traits:**
+- Signs up via magic link or Google OAuth
+- Can read public content without account
+- Can read gated content after acknowledging safety/license
+- Can leave suggestions (if owner allows)
+- Cannot edit content, cannot access owner tools
+- No GitHub account required
+- Stored in owner's Supabase
+
+### Researcher (Self-Hosted User)
+**Definition:** Someone who has deployed their own workspace (they are an owner of their own instance).
+
+**Key Traits:**
+- Has their own workspace deployment
+- Full onboarding: GitHub OAuth, repo fork, Keystatic access
+- Can create projects, sub-projects, methods, data
+- Can collaborate via GitHub (fork/PR workflow)
+- Owns their data completely
+
+### Commons Contributor
+**Definition:** Someone contributing to an organizational commons workspace (like Arc^).
+
+**Key Traits:**
+- Works on commons projects (Arc^ plasma research, etc.)
+- May have direct access (core team) or PR access (external contributors)
+- Subject to commons governance and review processes
+- Shares Commons Safety Registry (no duplicate acknowledgments)
+
+---
+
+## 3. Core Concepts
+
+### Commons Workspace (Organizational)
+**Definition:** An organizational workspace representing a collective research effort (like Arc^). It's a self-hosted deployment managed by an organization, where contributors submit work for review and verification.
+
+**Key Traits:**
+- Self-hosted on org's Vercel account (e.g., Arc^ deploys `arc-commons.vercel.app`)
 - Manual publishing only (human + automated checks)
 - Strong governance — linked to ethical and safety frameworks
 - Houses verified data, documentation, and visualizations
-- Access tiers: Admins → Reviewers → Approved Contributors → Public viewers
-- Acts as the "Commons Node" in a federated network
+- Core team has direct access, external contributors submit via PR
+- Commons Safety Registry (shared acknowledgment tracking)
+- Acts as authoritative source for verified research
 
-**Example Repositories:**
-- `commons-arcup/`
-- `commons-remote-sensing/`
-- `commons-soil-systems/`
+**Example:**
+- **Arc^ Commons** (plasma systems for ecological resilience)
+  - Deployed at: `arc-commons.vercel.app`
+  - GitHub org: `arc-plasma` or similar
+  - Content repos: `arc-plasma-systems`, `arc-soil-regeneration`, etc.
+  - Core team: Ali (founder), + future co-founders
+  - External contributors: Submit PRs from their own workspaces
 
-**Example Domains:**
-- `arcup.xbyali.page`
-- `remotesensing.xbyali.page`
+**Access Tiers:**
+- Core Team → Direct repo access, can merge
+- External Contributors → Fork/PR workflow
+- Readers → Can view public content, acknowledge safety to view gated
 
 ---
 
-### Personal Workspace
-**Definition:** The individual researcher's environment, designed for autonomy, exploration, and expression. This is where drafts, reflections, and early data live — each user's lab bench within the ecosystem.
+### Personal Workspace (Self-Hosted)
+**Definition:** An individual researcher's self-hosted workspace, designed for autonomy, exploration, and expression. Each researcher deploys their own independent instance.
 
 **Key Traits:**
-- Auto-publishing (no review gate within personal domain)
-- Multi-project navigation tabs — easy context switching between connected Commons Workspaces
-- Lightweight, Markdown-based interface (via CMS)
-- Supports both technical and reflective writing — notes, updates, art, insights
-- Option to submit work to a Commons Workspace when ready
-- Ethical baseline inherited from parent Commons (users must pass initial safety onboarding)
+- Self-hosted on researcher's Vercel account
+- Owner has full control (Keystatic, settings, repo management)
+- Content lives in owner's GitHub repo (`workspace-{username}`)
+- Auto-publishing within personal domain (owner decides when to publish)
+- Multi-project support with sub-projects (hierarchical organization)
+- Lightweight, Git-backed CMS (Keystatic)
+- Private by default, can be made public with CC licenses
+- Optional reader accounts (guests who want to read gated content)
+- Can collaborate with other researchers via GitHub (fork/PR)
+- Option to submit work to Commons when ready
 
-**Example Repositories:**
-- `workspace-ali/`
-- `workspace-leila/`
-- `workspace-dr_singh/`
-
-**Example Domains:**
-- `workspace.xbyali.page/`
-- `workspace.leila.com/`
-- `workspace.doctorsingh.com/`
+**Example:**
+- **Ali's Workspace**
+  - Deployed at: `alis-workspace.vercel.app` (Ali's Vercel account)
+  - Content repo: `workspace-ali` (Ali's GitHub)
+  - Owner: Ali (full access)
+  - Readers: Optional (people reading his gated research)
+  - Projects: "Plasma Systems for Ecology", "Remote Sensing for Salt Marshes", etc.
+  - Can submit to Arc^ Commons when work is ready
 
 
 ---
 
-## 2. Relationship Between the Two
+### Sub-Project (formerly "Stream")
+**Definition:** A hierarchical sub-division of a project, representing a phase, aspect, or nested experiment within research.
+
+**Key Traits:**
+- Can be nested infinitely (Project → Sub-Project → Sub-Sub-Project → ...)
+- Useful for organizing phases (Design, Testing, Deployment)
+- Useful for aspects (Hardware, Software, Data Analysis)
+- Each can have its own methods, docs, updates, data
+- Hierarchy displayed with breadcrumbs and tree navigation
+
+**Terminology Change (Nov 6, 2025):**
+- OLD: "Streams" (confusing, multiple meanings)
+- NEW: "Sub-Projects" (clear, supports hierarchy)
+
+**Example Hierarchy:**
+```
+Project: Plasma Systems for Ecology
+  ├─ Sub-Project: Design Phase
+  │   ├─ Sub-Project: Schematic Refinement
+  │   └─ Sub-Project: Material Selection
+  ├─ Sub-Project: Testing Phase
+  │   └─ Sub-Project: Bench Testing
+  └─ Sub-Project: Deployment Phase
+```
+
+---
+
+## 4. Relationship Flow (Personal ↔ Commons)
+
+### Distributed Collaboration Model
 
 ```
-Personal Workspace  →  Submission (API/PR)  →  Commons Workspace
-                                   ↓
-                 Human Review + Automated Validation
-                                   ↓
-                      Verified Publication (public data)
+Personal Workspace (Ali)        Personal Workspace (Sarah)
+  alis-workspace.vercel.app       sarahs-workspace.vercel.app
+         ↓                                  ↓
+    workspace-ali repo              workspace-sarah repo
+         ↓                                  ↓
+         └──────────────┬────────────────────┘
+                        ↓
+                 Fork & Submit PR
+                        ↓
+              Commons Workspace (Arc^)
+              arc-commons.vercel.app
+                        ↓
+         Human Review + Automated Validation
+                        ↓
+              Verified Publication (public)
 ```
 
 | Flow | Direction | Description |
 |------|-----------|-------------|
-| **Data** | Upward | Personal → Commons → Public |
-| **Guidelines & Safety** | Downward | Commons → Personal |
-| **Acknowledgement & Learning** | Both | Researchers learn, Commons gains data |
+| **Data** | Personal → Commons | Researchers submit completed work via PR |
+| **Guidelines & Safety** | Commons → Personal | Commons provides safety protocols, standards |
+| **Acknowledgement** | Commons → Personal | Commons Safety Registry tracks acknowledgments |
+| **Collaboration** | Personal ↔ Personal | Researchers fork each other's repos, submit PRs |
 
-**Metaphor:** The Personal Workspaces are gardens; the Commons Workspaces are forests. The former are places of cultivation and experimentation; the latter, shared ecological systems of verified growth.
+**Metaphor:** The Personal Workspaces are gardens; the Commons Workspaces are forests. The former are places of cultivation and experimentation; the latter, shared ecological systems of verified growth. Gardens can exchange seeds (fork/PR), and forests curate the best specimens (review/merge).
 
 ---
 
@@ -85,13 +202,16 @@ Personal Workspace  →  Submission (API/PR)  →  Commons Workspace
 
 ---
 
-## 4. Naming Conventions
+## 5. Naming Conventions
 
-### Repository Naming
-| Type | Pattern | Example |
-|------|---------|---------|
-| Commons Workspace | `commons-{project}` | `commons-arcup` |
-| Personal Workspace | `workspace-{username}` | `workspace-ali` |
+### Repository Naming (Standardized Nov 6, 2025)
+| Type | Pattern | Example | Notes |
+|------|---------|---------|-------|
+| Personal Content Repo | `workspace-{username}` | `workspace-ali` | User's content lives here |
+| Commons Content Repo | `arc-{project}` | `arc-plasma-systems` | Commons project repos |
+| Template Repo | `workspace-template` | `workspace-template` | Official template for forking |
+
+**Important:** Repository names do NOT include "by" (e.g., NOT `workspace-by-ali`). "Workspace by Ali" is the product/brand name only.
 
 ### Folder Structure
 | Location | Purpose |

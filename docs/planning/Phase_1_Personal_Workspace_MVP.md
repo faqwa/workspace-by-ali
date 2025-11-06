@@ -1,7 +1,21 @@
 # Phase 1: Personal Workspace MVP
 
-**Timeline:** 6-8 weeks
+**Timeline:** 6-8 weeks (original estimate)
 **Goal:** Ali can use workspace for ArcUp plasma research (single-user, multi-project, safety-gated, public-facing)
+
+**⚠️ OUTDATED (Nov 6, 2025):** This document was written before the architecture refactoring to self-hosted model. While the tasks are still generally valid, they need to be updated for:
+- Self-hosted deployment (not multi-tenant)
+- Owner/reader roles (not all users equal)
+- Keystatic CMS (not DecapCMS - though this doc mentions DecapCMS it was never actually used)
+- Streams → Sub-Projects terminology
+- Git-first content storage (already pivoted)
+
+**📖 For current plan, see:**
+- [MASTER_TASKLIST.md](../MASTER_TASKLIST.md) - Updated priorities
+- [Current Session Docs](../current/) - Nov 6 refactoring context
+- [QUICK_START_Nov6_2025.md](../current/QUICK_START_Nov6_2025.md) - Next steps
+
+**Use this document as reference for task structure, but check current priorities first.**
 
 ---
 

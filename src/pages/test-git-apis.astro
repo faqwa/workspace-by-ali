@@ -1,0 +1,492 @@
+---
+import BaseLayout from '../components/layouts/BaseLayout.astro';
+import { createSupabaseServer } from '../lib/supabaseServer';
+
+// Get authenticated user
+const supabase = createSupabaseServer(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
+const isAuthenticated = !!user;
+
+// Get user email if authenticated
+const userEmail = user?.email || '';
+---
+
+<BaseLayout title="Git API Testing Dashboard">
+  <div class="min-h-screen bg-base-200 py-8">
+    <div class="container mx-auto px-4 max-w-4xl">
+
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold text-base-content mb-2">
+          Git API Testing Dashboard
+        </h1>
+        <p class="text-base-content/70">
+          Interactive testing interface for GitHub OAuth, Fork, and Publish APIs
+        </p>
+      </div>
+
+      <!-- Auth Status -->
+      <div class="alert mb-6" class:list={[isAuthenticated ? 'alert-success' : 'alert-warning']}>
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={isAuthenticated ? "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" : "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"} />
+        </svg>
+        <div>
+          <h3 class="font-bold">{isAuthenticated ? 'Authenticated' : 'Not Authenticated'}</h3>
+          <div class="text-xs">
+            {isAuthenticated ? `Logged in as: ${userEmail}` : 'Please log in to test APIs'}
+          </div>
+        </div>
+      </div>
+
+      {!isAuthenticated && (
+        <div class="card bg-base-100 shadow-xl mb-6">
+          <div class="card-body">
+            <h2 class="card-title">Step 1: Log In</h2>
+            <p>You need to be authenticated to test these APIs.</p>
+            <div class="card-actions justify-end">
+              <a href="/login" class="btn btn-primary">Go to Login</a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isAuthenticated && (
+        <>
+          <!-- Test 1: GitHub OAuth -->
+          <div class="card bg-base-100 shadow-xl mb-6">
+            <div class="card-body">
+              <h2 class="card-title">Test 1: GitHub OAuth Connection</h2>
+              <p class="text-sm text-base-content/70 mb-4">
+                Connect your GitHub account to enable repository operations.
+              </p>
+
+              <div class="space-y-4">
+                <button
+                  id="test-github-connect"
+                  class="btn btn-primary w-full"
+                  onclick="testGitHubConnect()"
+                >
+                  Connect GitHub Account
+                </button>
+
+                <div id="github-result" class="hidden">
+                  <div class="alert alert-info">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span id="github-status">Redirecting to GitHub...</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="collapse collapse-arrow bg-base-200 mt-4">
+                <input type="checkbox" />
+                <div class="collapse-title text-sm font-medium">
+                  Technical Details
+                </div>
+                <div class="collapse-content text-xs">
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>Endpoint: GET /api/auth/github-connect</li>
+                    <li>Redirects to GitHub OAuth</li>
+                    <li>Scopes: repo, read:user</li>
+                    <li>Callback: /api/auth/github-callback</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Test 2: Fork Status Check -->
+          <div class="card bg-base-100 shadow-xl mb-6">
+            <div class="card-body">
+              <h2 class="card-title">Test 2: Check Fork Status</h2>
+              <p class="text-sm text-base-content/70 mb-4">
+                Check if your workspace repository has been created.
+              </p>
+
+              <div class="space-y-4">
+                <button
+                  id="test-fork-status"
+                  class="btn btn-secondary w-full"
+                  onclick="testForkStatus()"
+                >
+                  Check Fork Status
+                </button>
+
+                <div id="fork-status-result" class="hidden"></div>
+              </div>
+
+              <div class="collapse collapse-arrow bg-base-200 mt-4">
+                <input type="checkbox" />
+                <div class="collapse-title text-sm font-medium">
+                  Technical Details
+                </div>
+                <div class="collapse-content text-xs">
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>Endpoint: GET /api/repo/fork</li>
+                    <li>Returns: fork status, GitHub connection, repo details</li>
+                    <li>No side effects (read-only)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Test 3: Create Fork -->
+          <div class="card bg-base-100 shadow-xl mb-6">
+            <div class="card-body">
+              <h2 class="card-title">Test 3: Create Workspace Fork</h2>
+              <p class="text-sm text-base-content/70 mb-4">
+                Fork the workspace template repository to your GitHub account.
+              </p>
+
+              <div class="space-y-4">
+                <div class="alert alert-warning">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                  <span class="text-sm">⚠️ This will create a real repository on your GitHub account</span>
+                </div>
+
+                <button
+                  id="test-create-fork"
+                  class="btn btn-warning w-full"
+                  onclick="testCreateFork()"
+                >
+                  Create Fork (Irreversible)
+                </button>
+
+                <div id="fork-result" class="hidden"></div>
+              </div>
+
+              <div class="collapse collapse-arrow bg-base-200 mt-4">
+                <input type="checkbox" />
+                <div class="collapse-title text-sm font-medium">
+                  Technical Details
+                </div>
+                <div class="collapse-content text-xs">
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>Endpoint: POST /api/repo/fork</li>
+                    <li>Template: writingsbyali-hub/workspace-by-ali-template</li>
+                    <li>Creates: workspace-&#123;username&#125;</li>
+                    <li>Branches: main, draft</li>
+                    <li>Rate limit: 1 fork/minute</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Test 4: Publish Status -->
+          <div class="card bg-base-100 shadow-xl mb-6">
+            <div class="card-body">
+              <h2 class="card-title">Test 4: Check Publish Status</h2>
+              <p class="text-sm text-base-content/70 mb-4">
+                Check if there are unpublished changes (draft vs main branch).
+              </p>
+
+              <div class="space-y-4">
+                <button
+                  id="test-publish-status"
+                  class="btn btn-accent w-full"
+                  onclick="testPublishStatus()"
+                >
+                  Check Publish Status
+                </button>
+
+                <div id="publish-status-result" class="hidden"></div>
+              </div>
+
+              <div class="collapse collapse-arrow bg-base-200 mt-4">
+                <input type="checkbox" />
+                <div class="collapse-title text-sm font-medium">
+                  Technical Details
+                </div>
+                <div class="collapse-content text-xs">
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>Endpoint: GET /api/publish</li>
+                    <li>Compares: draft vs main branches</li>
+                    <li>Returns: commits ahead/behind, comparison URL</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Test 5: Publish Changes -->
+          <div class="card bg-base-100 shadow-xl mb-6">
+            <div class="card-body">
+              <h2 class="card-title">Test 5: Publish Changes</h2>
+              <p class="text-sm text-base-content/70 mb-4">
+                Merge draft branch into main (publish your changes).
+              </p>
+
+              <div class="space-y-4">
+                <div class="alert alert-info text-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  <span>Make sure you have commits on draft branch before testing</span>
+                </div>
+
+                <button
+                  id="test-publish"
+                  class="btn btn-success w-full"
+                  onclick="testPublish()"
+                >
+                  Publish Draft to Main
+                </button>
+
+                <div id="publish-result" class="hidden"></div>
+              </div>
+
+              <div class="collapse collapse-arrow bg-base-200 mt-4">
+                <input type="checkbox" />
+                <div class="collapse-title text-sm font-medium">
+                  Technical Details
+                </div>
+                <div class="collapse-content text-xs">
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>Endpoint: POST /api/publish</li>
+                    <li>Merges: draft → main</li>
+                    <li>Handles: conflicts, no changes, already up to date</li>
+                    <li>Returns: merge commit SHA</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Test Log -->
+          <div class="card bg-base-100 shadow-xl mb-6">
+            <div class="card-body">
+              <h2 class="card-title">Test Log</h2>
+              <div id="test-log" class="bg-base-200 p-4 rounded-lg font-mono text-xs max-h-96 overflow-y-auto">
+                <div class="text-success">Ready to test. Click buttons above to begin.</div>
+              </div>
+              <button onclick="clearLog()" class="btn btn-sm btn-ghost mt-2">Clear Log</button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+</BaseLayout>
+
+<script is:inline>
+  // Utility: Log to test log
+  function log(message, type = 'info') {
+    const logDiv = document.getElementById('test-log');
+    const timestamp = new Date().toLocaleTimeString();
+    const colors = {
+      info: 'text-info',
+      success: 'text-success',
+      error: 'text-error',
+      warning: 'text-warning'
+    };
+    logDiv.innerHTML += `\n<div class="${colors[type]}">[${timestamp}] ${message}</div>`;
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+
+  function clearLog() {
+    document.getElementById('test-log').innerHTML = '<div class="text-success">Log cleared. Ready to test.</div>';
+  }
+
+  // Test 1: GitHub Connect
+  function testGitHubConnect() {
+    log('Initiating GitHub OAuth connection...', 'info');
+    log('Redirecting to /api/auth/github-connect', 'info');
+    setTimeout(() => {
+      window.location.href = '/api/auth/github-connect';
+    }, 500);
+  }
+
+  // Test 2: Fork Status
+  async function testForkStatus() {
+    const btn = document.getElementById('test-fork-status');
+    const resultDiv = document.getElementById('fork-status-result');
+
+    btn.disabled = true;
+    btn.classList.add('loading');
+    log('Checking fork status...', 'info');
+
+    try {
+      const response = await fetch('/api/repo/fork');
+      const data = await response.json();
+
+      log(`Response: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+      log(`Data: ${JSON.stringify(data, null, 2)}`, 'info');
+
+      resultDiv.className = 'alert ' + (response.ok ? 'alert-success' : 'alert-error');
+      resultDiv.innerHTML = `
+        <div class="w-full">
+          <h3 class="font-bold">Result:</h3>
+          <pre class="text-xs mt-2 overflow-x-auto">${JSON.stringify(data, null, 2)}</pre>
+        </div>
+      `;
+      resultDiv.classList.remove('hidden');
+
+      if (data.success) {
+        log('✅ Fork status retrieved successfully', 'success');
+        log(`GitHub Connected: ${data.github_connected}`, 'info');
+        log(`Forked: ${data.forked}`, 'info');
+        if (data.forked) {
+          log(`Repo: ${data.repo_url}`, 'info');
+        }
+      }
+    } catch (error) {
+      log(`❌ Error: ${error.message}`, 'error');
+      resultDiv.className = 'alert alert-error';
+      resultDiv.innerHTML = `<span>Error: ${error.message}</span>`;
+      resultDiv.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    }
+  }
+
+  // Test 3: Create Fork
+  async function testCreateFork() {
+    if (!confirm('This will create a real repository on your GitHub account. Continue?')) {
+      log('Fork creation cancelled by user', 'warning');
+      return;
+    }
+
+    const btn = document.getElementById('test-create-fork');
+    const resultDiv = document.getElementById('fork-result');
+
+    btn.disabled = true;
+    btn.classList.add('loading');
+    log('Creating fork...', 'info');
+    log('This may take 10-30 seconds...', 'warning');
+
+    try {
+      const response = await fetch('/api/repo/fork', { method: 'POST' });
+      const data = await response.json();
+
+      log(`Response: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+      log(`Data: ${JSON.stringify(data, null, 2)}`, 'info');
+
+      resultDiv.className = 'alert ' + (response.ok ? 'alert-success' : 'alert-error');
+      resultDiv.innerHTML = `
+        <div class="w-full">
+          <h3 class="font-bold">${response.ok ? 'Success!' : 'Error'}</h3>
+          <pre class="text-xs mt-2 overflow-x-auto">${JSON.stringify(data, null, 2)}</pre>
+          ${data.repo_url ? `<a href="${data.repo_url}" target="_blank" class="btn btn-sm btn-primary mt-2">View on GitHub</a>` : ''}
+        </div>
+      `;
+      resultDiv.classList.remove('hidden');
+
+      if (data.success) {
+        log('✅ Fork created successfully!', 'success');
+        log(`Repository: ${data.repo_url}`, 'success');
+      } else {
+        log(`❌ Error: ${data.error || data.message}`, 'error');
+      }
+    } catch (error) {
+      log(`❌ Error: ${error.message}`, 'error');
+      resultDiv.className = 'alert alert-error';
+      resultDiv.innerHTML = `<span>Error: ${error.message}</span>`;
+      resultDiv.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    }
+  }
+
+  // Test 4: Publish Status
+  async function testPublishStatus() {
+    const btn = document.getElementById('test-publish-status');
+    const resultDiv = document.getElementById('publish-status-result');
+
+    btn.disabled = true;
+    btn.classList.add('loading');
+    log('Checking publish status...', 'info');
+
+    try {
+      const response = await fetch('/api/publish');
+      const data = await response.json();
+
+      log(`Response: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+      log(`Data: ${JSON.stringify(data, null, 2)}`, 'info');
+
+      resultDiv.className = 'alert ' + (response.ok ? 'alert-info' : 'alert-error');
+      resultDiv.innerHTML = `
+        <div class="w-full">
+          <h3 class="font-bold">Publish Status:</h3>
+          <pre class="text-xs mt-2 overflow-x-auto">${JSON.stringify(data, null, 2)}</pre>
+          ${data.compare_url ? `<a href="${data.compare_url}" target="_blank" class="btn btn-sm btn-secondary mt-2">View Diff on GitHub</a>` : ''}
+        </div>
+      `;
+      resultDiv.classList.remove('hidden');
+
+      if (data.success) {
+        log('✅ Publish status retrieved', 'success');
+        log(`Has unpublished changes: ${data.has_unpublished_changes}`, 'info');
+        log(`Commits ahead: ${data.commits_ahead}`, 'info');
+      }
+    } catch (error) {
+      log(`❌ Error: ${error.message}`, 'error');
+      resultDiv.className = 'alert alert-error';
+      resultDiv.innerHTML = `<span>Error: ${error.message}</span>`;
+      resultDiv.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    }
+  }
+
+  // Test 5: Publish
+  async function testPublish() {
+    if (!confirm('This will merge your draft branch into main. Continue?')) {
+      log('Publish cancelled by user', 'warning');
+      return;
+    }
+
+    const btn = document.getElementById('test-publish');
+    const resultDiv = document.getElementById('publish-result');
+
+    btn.disabled = true;
+    btn.classList.add('loading');
+    log('Publishing changes (merging draft → main)...', 'info');
+
+    try {
+      const response = await fetch('/api/publish', { method: 'POST' });
+      const data = await response.json();
+
+      log(`Response: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+      log(`Data: ${JSON.stringify(data, null, 2)}`, 'info');
+
+      resultDiv.className = 'alert ' + (response.ok ? 'alert-success' : 'alert-error');
+      resultDiv.innerHTML = `
+        <div class="w-full">
+          <h3 class="font-bold">${response.ok ? 'Published!' : 'Error'}</h3>
+          <pre class="text-xs mt-2 overflow-x-auto">${JSON.stringify(data, null, 2)}</pre>
+        </div>
+      `;
+      resultDiv.classList.remove('hidden');
+
+      if (data.success) {
+        log('✅ Changes published successfully!', 'success');
+        if (data.commit_sha) {
+          log(`Merge commit: ${data.commit_sha}`, 'success');
+        }
+      } else {
+        log(`❌ Error: ${data.error || data.message}`, 'error');
+        if (data.code === 'MERGE_CONFLICT') {
+          log('⚠️ Merge conflicts detected - manual resolution required', 'warning');
+        }
+      }
+    } catch (error) {
+      log(`❌ Error: ${error.message}`, 'error');
+      resultDiv.className = 'alert alert-error';
+      resultDiv.innerHTML = `<span>Error: ${error.message}</span>`;
+      resultDiv.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    }
+  }
+
+  // Check for github_connected query param (redirected from OAuth)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('github_connected') === 'true') {
+    log('✅ GitHub OAuth completed successfully!', 'success');
+    log('You can now test fork and publish APIs', 'info');
+  }
+</script>
+</BaseLayout>

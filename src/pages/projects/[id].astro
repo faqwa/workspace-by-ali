@@ -1,85 +1,102 @@
 ---
 import DashboardLayout from '../../components/layouts/DashboardLayout.astro';
 import ActivityLog from '../../components/ui/ActivityLog';
+import Breadcrumb from '../../components/ui/Breadcrumb';
 import { createSupabaseServer } from '../../lib/supabaseServer';
+import { fetchProjectFromGit, listUpdates, checkContentAccess } from '../../lib/github';
+import { decryptToken } from '../../lib/tokenEncryption';
 import { formatDistanceToNow } from 'date-fns';
+import { Markdown } from '@astrojs/markdown-remark';
 
-// Get project ID from URL
-const { id } = Astro.params;
+// Get project slug from URL
+const { id: projectSlug } = Astro.params;
 
 // Get user
 const supabase = createSupabaseServer(Astro.cookies);
 const { data: { user } } = await supabase.auth.getUser();
 
-if (!user) {
-  return Astro.redirect('/login');
-}
-
-if (!id) {
+if (!projectSlug) {
   return Astro.redirect('/projects');
 }
 
-// Fetch project details
-const { data: project, error: projectError } = await supabase
-  .from('projects')
-  .select('*')
-  .eq('id', id)
+// Fetch user's GitHub repo info
+const { data: userRepo, error: repoError } = await supabase
+  .from('user_repos')
+  .select('repo_owner, repo_name, github_token_encrypted, user_id')
+  .eq('user_id', user?.id || '')
   .single();
 
-if (projectError || !project) {
+if (repoError || !userRepo || !userRepo.github_token_encrypted) {
+  // User hasn't connected GitHub yet - redirect to onboarding
+  if (!user) {
+    return Astro.redirect('/login');
+  }
+  return Astro.redirect('/onboarding');
+}
+
+// Decrypt GitHub token
+let githubToken: string;
+try {
+  githubToken = decryptToken(userRepo.github_token_encrypted);
+} catch (error) {
+  console.error('[Project Page] Token decryption failed:', error);
+  return Astro.redirect('/onboarding');
+}
+
+// Fetch project from GitHub
+const project = await fetchProjectFromGit(
+  githubToken,
+  userRepo.repo_owner,
+  userRepo.repo_name,
+  projectSlug
+);
+
+if (!project) {
   return Astro.redirect('/projects');
 }
 
-// Check if user owns this project or if it's public
-if (project.owner !== user.id && project.visibility !== 'public') {
+// Check access control
+const isOwner = user?.id === userRepo.user_id;
+const accessCheck = checkContentAccess(project.visibility, isOwner, false);
+
+if (!accessCheck.allowed) {
+  // TODO: Show safety modal for gated content
   return Astro.redirect('/projects');
 }
 
-// Fetch activities linked to this project
-const { data: activities, error: activitiesError } = await supabase
-  .from('activities')
-  .select('*')
-  .eq('project_id', id)
-  .order('created_at', { ascending: false });
+// Fetch updates for this project
+const updateSlugs = await listUpdates(
+  githubToken,
+  userRepo.repo_owner,
+  userRepo.repo_name
+);
 
-if (activitiesError) {
-  console.error('Error fetching activities:', activitiesError);
-}
-
-// Transform activities for ActivityLog component
-const activityLogData = (activities || []).map((activity) => ({
-  id: activity.id,
-  title: activity.title,
-  description: activity.content?.substring(0, 200),
-  timestamp: new Date(activity.created_at),
-  type: activity.type || 'update',
-}));
-
-// Count stats
-const totalActivities = activities?.length || 0;
-const isOwner = project.owner === user.id;
+// TODO: Filter updates by projectSlug and fetch their content
+// For now, just show count
+const totalUpdates = 0; // We'll implement this properly later
 
 // Format dates
-const createdDate = new Date(project.created_at);
+const createdDate = project.startDate ? new Date(project.startDate) : new Date();
 const createdAgo = formatDistanceToNow(createdDate, { addSuffix: true });
 ---
 
-<DashboardLayout title={`${project.name} - Workspace`}>
+<DashboardLayout title={`${project.title} - Workspace`}>
   <!-- Breadcrumb -->
-  <div class="text-sm breadcrumbs mb-4">
-    <ul>
-      <li><a href="/" class="text-base-content/60 hover:text-primary">Dashboard</a></li>
-      <li><a href="/projects" class="text-base-content/60 hover:text-primary">Projects</a></li>
-      <li class="text-base-content">{project.name}</li>
-    </ul>
-  </div>
+  <Breadcrumb
+    client:load
+    items={[
+      { label: 'Dashboard', href: '/' },
+      { label: 'Projects', href: '/projects' },
+      { label: project.title }
+    ]}
+  />
 
   <!-- Header -->
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
     <div class="flex-1">
       <div class="flex items-center gap-3 mb-2">
         <h1 class="text-3xl font-bold text-base-content">
-          {project.name}
+          {project.title}
         </h1>
 
         <!-- Visibility badge -->
@@ -122,33 +139,18 @@ const createdAgo = formatDistanceToNow(createdDate, { addSuffix: true });
     <!-- Action buttons (only for owner) -->
     {isOwner && (
       <div class="flex gap-2">
-        <a href={`/updates/new?project=${id}`} class="btn bg-[#22c55e] hover:bg-[#16a34a] text-white border-0">
+        <a href={`/keystatic/collection/projects/item/${projectSlug}`} class="btn bg-[#22c55e] hover:bg-[#16a34a] text-white border-0">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-5 h-5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
           </svg>
-          New Update
+          Edit in Keystatic
         </a>
-        <div class="dropdown dropdown-end">
-          <label tabindex="0" class="btn btn-ghost">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
-            </svg>
-          </label>
-          <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-            <li><a href={`/projects/${id}/edit`}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
-              </svg>
-              Edit Project
-            </a></li>
-            <li><a class="text-error" onclick="if(confirm('Delete this project? This cannot be undone.')) { fetch(`/api/projects/${id}`, { method: 'DELETE' }).then(() => window.location.href='/projects'); }">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-              </svg>
-              Delete Project
-            </a></li>
-          </ul>
-        </div>
+        <a href={`https://github.com/${userRepo.repo_owner}/${userRepo.repo_name}/tree/main/content/projects/${projectSlug}`} target="_blank" rel="noopener noreferrer" class="btn btn-ghost">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-5 h-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+          </svg>
+          View on GitHub
+        </a>
       </div>
     )}
   </div>
@@ -156,20 +158,20 @@ const createdAgo = formatDistanceToNow(createdDate, { addSuffix: true });
   <!-- Stats -->
   <div class="stats shadow mb-8 w-full">
     <div class="stat">
-      <div class="stat-title">Total Updates</div>
-      <div class="stat-value text-primary">{totalActivities}</div>
-      <div class="stat-desc">Activity entries</div>
+      <div class="stat-title">Status</div>
+      <div class="stat-value text-primary text-2xl capitalize">{project.status}</div>
+      <div class="stat-desc">Project status</div>
     </div>
 
     <div class="stat">
       <div class="stat-title">Visibility</div>
-      <div class="stat-value text-base-content text-2xl">{project.visibility}</div>
-      <div class="stat-desc">{project.visibility === 'public' ? 'Anyone can view' : 'Only you can see'}</div>
+      <div class="stat-value text-base-content text-2xl capitalize">{project.visibility}</div>
+      <div class="stat-desc">{project.visibility === 'public' ? 'Anyone can view' : project.visibility === 'gated' ? 'Safety acknowledgment required' : 'Only you can see'}</div>
     </div>
 
     <div class="stat">
       <div class="stat-title">Category</div>
-      <div class="stat-value text-base-content text-2xl">{project.category || 'None'}</div>
+      <div class="stat-value text-base-content text-2xl capitalize">{project.category || 'None'}</div>
       <div class="stat-desc">Project type</div>
     </div>
   </div>
@@ -184,20 +186,40 @@ const createdAgo = formatDistanceToNow(createdDate, { addSuffix: true });
     </div>
   )}
 
+  <!-- Project Content (Markdown Body) -->
+  {project.body && (
+    <div class="card bg-base-100 shadow mb-8">
+      <div class="card-body">
+        <div class="prose max-w-none">
+          <div set:html={project.body} />
+        </div>
+      </div>
+    </div>
+  )}
+
+  <!-- Tags -->
+  {project.tags && project.tags.length > 0 && (
+    <div class="flex gap-2 mb-8 flex-wrap">
+      {project.tags.map((tag) => (
+        <div class="badge badge-outline">{tag}</div>
+      ))}
+    </div>
+  )}
+
   <!-- Recent Updates -->
   <div class="card bg-base-100 shadow">
     <div class="card-body">
       <div class="flex justify-between items-center mb-4">
         <h2 class="card-title text-xl">Recent Updates</h2>
-        {isOwner && totalActivities > 0 && (
-          <a href={`/updates?project=${id}`} class="btn btn-ghost btn-sm">
-            View All →
+        {isOwner && (
+          <a href={`/keystatic/collection/updates/create`} class="btn btn-ghost btn-sm">
+            Create Update →
           </a>
         )}
       </div>
 
-      {totalActivities > 0 ? (
-        <ActivityLog client:load activities={activityLogData} limit={10} showViewAll={false} />
+      {totalUpdates > 0 ? (
+        <p class="text-base-content/60">Updates will be displayed here once implemented.</p>
       ) : (
         <div class="text-center py-8">
           <div class="text-base-content/40 mb-4">
@@ -207,7 +229,7 @@ const createdAgo = formatDistanceToNow(createdDate, { addSuffix: true });
           </div>
           <p class="text-base-content/60 mb-4">No updates yet</p>
           {isOwner && (
-            <a href={`/updates/new?project=${id}`} class="btn btn-primary btn-sm">
+            <a href={`/keystatic/collection/updates/create`} class="btn btn-primary btn-sm">
               Create First Update
             </a>
           )}

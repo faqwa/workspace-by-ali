@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Button } from './Button';
 
 interface ProfileSettingsProps {
   userEmail: string;
@@ -248,23 +249,22 @@ export default function ProfileSettings({
 
       {/* Actions */}
       <div className="card-actions justify-end mt-6">
-        <button type="button" className="btn btn-ghost" onClick={handleCancel} disabled={isLoading}>
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="btn bg-[#22c55e] hover:bg-[#16a34a] text-white border-0"
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={handleCancel}
           disabled={isLoading}
         >
-          {isLoading ? (
-            <>
-              <span className="loading loading-spinner loading-sm"></span>
-              Saving...
-            </>
-          ) : (
-            'Save Changes'
-          )}
-        </button>
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          variant="primary"
+          isLoading={isLoading}
+          loadingText="Saving..."
+        >
+          Save Changes
+        </Button>
       </div>
     </form>
   );

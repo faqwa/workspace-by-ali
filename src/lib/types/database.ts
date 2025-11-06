@@ -81,7 +81,7 @@ export interface Database {
           created_at?: string
         }
       }
-      streams: {
+      subprojects: {
         Row: {
           id: string
           project_id: string
@@ -114,7 +114,7 @@ export interface Database {
         Row: {
           id: string
           project_id: string
-          stream_id: string | null
+          subproject_id: string | null
           user_id: string
           title: string
           description: string | null
@@ -128,7 +128,7 @@ export interface Database {
         Insert: {
           id?: string
           project_id: string
-          stream_id?: string | null
+          subproject_id?: string | null
           user_id: string
           title: string
           description?: string | null
@@ -142,7 +142,7 @@ export interface Database {
         Update: {
           id?: string
           project_id?: string
-          stream_id?: string | null
+          subproject_id?: string | null
           user_id?: string
           title?: string
           description?: string | null
@@ -158,7 +158,7 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          stream_id: string | null
+          subproject_id: string | null
           protocol_version: string | null
           signed_at: string
           acknowledgment: boolean
@@ -166,7 +166,7 @@ export interface Database {
         Insert: {
           id?: string
           user_id: string
-          stream_id?: string | null
+          subproject_id?: string | null
           protocol_version?: string | null
           signed_at?: string
           acknowledgment?: boolean
@@ -174,7 +174,7 @@ export interface Database {
         Update: {
           id?: string
           user_id?: string
-          stream_id?: string | null
+          subproject_id?: string | null
           protocol_version?: string | null
           signed_at?: string
           acknowledgment?: boolean
