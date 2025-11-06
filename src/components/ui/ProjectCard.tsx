@@ -20,18 +20,18 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   };
 
   const getCategoryColor = (category: string | undefined) => {
-    if (!category) return 'badge-ghost';
+    if (!category) return 'bg-base-200 text-base-content';
 
     const colors: Record<string, string> = {
-      'research': 'badge-primary',
-      'development': 'badge-secondary',
-      'design': 'badge-accent',
-      'documentation': 'badge-info',
-      'experiment': 'badge-warning',
-      'other': 'badge-ghost',
+      'research': 'bg-personal-primary/10 text-personal-primary border border-personal-primary/20',
+      'development': 'bg-commons-primary/10 text-commons-primary border border-commons-primary/20',
+      'design': 'bg-purple-500/10 text-purple-600 border border-purple-500/20',
+      'documentation': 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
+      'experiment': 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
+      'other': 'bg-base-200 text-base-content',
     };
 
-    return colors[category.toLowerCase()] || 'badge-ghost';
+    return colors[category.toLowerCase()] || 'bg-base-200 text-base-content';
   };
 
   const formatDate = (dateString: string) => {
@@ -45,12 +45,12 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   return (
     <a
       href={`/projects/${project.id}`}
-      className="card bg-base-100 border border-base-300 hover:border-primary hover:shadow-lg transition-all duration-200 cursor-pointer group"
+      className="card bg-base-100 shadow-sm border border-base-300 hover:border-personal-primary/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
     >
       <div className="card-body">
         {/* Header with badges */}
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="card-title text-lg font-semibold text-base-content group-hover:text-primary transition-colors">
+          <h3 className="card-title text-lg font-semibold text-base-content group-hover:text-personal-primary transition-colors">
             {project.name}
           </h3>
           <div className="flex gap-1 flex-shrink-0">
@@ -78,11 +78,13 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         {/* Footer with category and date */}
         <div className="card-actions justify-between items-center">
           {project.category ? (
-            <div className={`badge ${getCategoryColor(project.category)} badge-sm`}>
+            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getCategoryColor(project.category)}`}>
               {project.category}
-            </div>
+            </span>
           ) : (
-            <div className="badge badge-ghost badge-sm">Uncategorized</div>
+            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-base-200 text-base-content">
+              Uncategorized
+            </span>
           )}
 
           <div className="text-xs text-base-content/50 flex items-center gap-1">
