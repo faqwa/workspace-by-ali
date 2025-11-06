@@ -26,23 +26,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Personal Workspace colors
+        // Personal Workspace colors - Reference CSS variables
         personal: {
-          primary: '#22c55e',  // Green-500 - Growth
-          accent: '#84cc16',   // Lime-500 - Fresh
-          light: '#f0fdf4',    // Green-50 - Surface
+          primary: 'var(--personal-primary)',  // Green - Growth
+          'primary-hover': '#16a34a',          // Green-600 for hover states
+          accent: '#84cc16',                   // Lime-500 - Fresh
+          light: '#f0fdf4',                    // Green-50 - Surface
         },
-        // Commons Workspace colors
+        // Commons Workspace colors - Reference CSS variables
         commons: {
-          primary: '#3b82f6',  // Blue-500 - Trust
-          accent: '#06b6d4',   // Cyan-500 - Clarity
-          light: '#eff6ff',    // Blue-50 - Surface
+          primary: 'var(--commons-primary)',   // Blue - Trust
+          'primary-hover': '#2563eb',          // Blue-600 for hover states
+          accent: '#06b6d4',                   // Cyan-500 - Clarity
+          light: '#eff6ff',                    // Blue-50 - Surface
         },
-        // Safety protocol states
+        // Safety protocol states - Reference CSS variables
         safety: {
-          current: '#22c55e',  // Green - Up to date 🟢
-          pending: '#f59e0b',  // Amber - Review needed 🟡
-          required: '#ef4444', // Red - Action required 🔴
+          current: 'var(--safety-current)',    // Green - Up to date 🟢
+          pending: 'var(--safety-pending)',    // Amber - Review needed 🟡
+          required: 'var(--safety-required)',  // Red - Action required 🔴
         },
       },
       keyframes: {

@@ -108,7 +108,7 @@ export default class ErrorBoundary extends Component<Props, State> {
                 </button>
                 <a
                   href="/"
-                  className="btn bg-[#22c55e] hover:bg-[#16a34a] text-white border-0 flex-1"
+                  className="btn bg-personal-primary hover:bg-personal-primary-hover text-white border-0 flex-1"
                 >
                   Go Home
                 </a>

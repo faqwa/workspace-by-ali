@@ -111,7 +111,7 @@ export default function ConfirmDialog({
       case 'warning':
         return 'btn bg-warning hover:bg-warning/90 text-white border-0';
       case 'info':
-        return 'btn bg-[#22c55e] hover:bg-[#16a34a] text-white border-0';
+        return 'btn bg-personal-primary hover:bg-personal-primary-hover text-white border-0';
     }
   };
 

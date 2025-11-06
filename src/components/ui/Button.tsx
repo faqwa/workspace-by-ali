@@ -12,8 +12,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-[#22c55e] hover:bg-[#16a34a] text-white border-0 shadow-sm hover:shadow-md active:scale-95',
-        secondary: 'bg-[#3b82f6] hover:bg-[#2563eb] text-white border-0 shadow-sm hover:shadow-md active:scale-95',
+        primary: 'bg-personal-primary hover:bg-personal-primary-hover text-white border-0 shadow-sm hover:shadow-md active:scale-95',
+        secondary: 'bg-commons-primary hover:bg-commons-primary-hover text-white border-0 shadow-sm hover:shadow-md active:scale-95',
         danger: 'bg-error hover:bg-error/90 text-white border-0 shadow-sm hover:shadow-md active:scale-95',
         outline: 'btn-outline hover:bg-base-200 active:scale-95',
         ghost: 'btn-ghost hover:bg-base-200 active:scale-95',

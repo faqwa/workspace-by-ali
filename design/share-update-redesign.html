@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share an Update - Workspace (Redesigned)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #F9FAFB;
+            color: #111827;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid #E5E7EB;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 0;
+        }
+
+        .logo {
+            padding: 0 24px 24px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #00D084;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-section {
+            padding: 0 16px;
+            margin-bottom: 32px;
+        }
+
+        .sidebar-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6B7280;
+            padding: 0 12px 8px;
+        }
+
+        .project-dropdown {
+            background: #F3F4F6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .project-info h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .project-info p {
+            font-size: 12px;
+            color: #6B7280;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin: 2px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #6B7280;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: #F3F4F6;
+            color: #111827;
+        }
+
+        .nav-item.active {
+            background: #E6F9F3;
+            color: #00A368;
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .badge {
+            background: #7C3AED;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 0 16px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-top: 1px solid #E5E7EB;
+            margin-top: 16px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #111827;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            padding: 32px 40px;
+            overflow-y: auto;
+            max-width: 900px;
+        }
+
+        /* BREADCRUMB */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .breadcrumb a {
+            color: #7C3AED;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover {
+            color: #6D28D9;
+            text-decoration: underline;
+        }
+
+        .breadcrumb-separator {
+            color: #9CA3AF;
+        }
+
+        .breadcrumb-current {
+            color: #6B7280;
+        }
+
+        /* PAGE HEADER */
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 15px;
+            color: #6B7280;
+        }
+
+        /* FORM */
+        .form-container {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 32px;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .required-badge {
+            background: #FEE2E2;
+            color: #DC2626;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .optional-badge {
+            background: #F3F4F6;
+            color: #6B7280;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #D1D5DB;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #111827;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00D084;
+            box-shadow: 0 0 0 3px rgba(0, 208, 132, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #9CA3AF;
+        }
+
+        .form-input.error {
+            border-color: #DC2626;
+        }
+
+        .form-input.error:focus {
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 240px;
+            resize: vertical;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            line-height: 1.6;
+        }
+
+        .form-helper {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-top: 6px;
+            font-size: 13px;
+            color: #6B7280;
+            line-height: 1.4;
+        }
+
+        .helper-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            margin-top: 1px;
+            color: #9CA3AF;
+        }
+
+        .error-message {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            font-size: 13px;
+            color: #DC2626;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: #9CA3AF;
+            margin-top: 6px;
+        }
+
+        /* MARKDOWN TOOLBAR */
+        .markdown-toolbar {
+            display: flex;
+            gap: 4px;
+            padding: 8px;
+            background: #F9FAFB;
+            border: 1.5px solid #D1D5DB;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .toolbar-btn {
+            padding: 6px 10px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #6B7280;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .toolbar-btn:hover {
+            background: white;
+            color: #111827;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            background: #E5E7EB;
+            margin: 0 4px;
+        }
+
+        .editor-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: -1.5px;
+        }
+
+        .editor-tab {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            color: #6B7280;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .editor-tab:hover {
+            color: #111827;
+            background: #F9FAFB;
+        }
+
+        .editor-tab.active {
+            color: #00A368;
+            background: white;
+            border: 1.5px solid #D1D5DB;
+            border-bottom: 1.5px solid white;
+        }
+
+        .form-textarea.with-toolbar {
+            border-radius: 0 0 8px 8px;
+        }
+
+        .preview-container {
+            min-height: 240px;
+            padding: 16px;
+            border: 1.5px solid #D1D5DB;
+            border-radius: 0 0 8px 8px;
+            background: white;
+            display: none;
+        }
+
+        .preview-container.active {
+            display: block;
+        }
+
+        .preview-container h1, .preview-container h2, .preview-container h3 {
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+
+        .preview-container p {
+            margin-bottom: 12px;
+        }
+
+        .preview-container code {
+            background: #F3F4F6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        /* SELECT */
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            padding-right: 40px;
+            border: 1.5px solid #D1D5DB;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #111827;
+            background: white;
+            background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            cursor: pointer;
+            appearance: none;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #00D084;
+            box-shadow: 0 0 0 3px rgba(0, 208, 132, 0.1);
+        }
+
+        /* BUTTONS */
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .actions-left {
+            display: flex;
+            gap: 12px;
+        }
+
+        .actions-right {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #6B7280;
+            border: 1.5px solid #D1D5DB;
+        }
+
+        .btn-secondary:hover {
+            background: #F9FAFB;
+            border-color: #9CA3AF;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: #6B7280;
+            padding: 12px 16px;
+        }
+
+        .btn-ghost:hover {
+            background: #F3F4F6;
+            color: #111827;
+        }
+
+        .btn-primary {
+            background: #00D084;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #00A368;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 208, 132, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #9CA3AF;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .shortcut-hint {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-left: 8px;
+        }
+
+        /* INFO SECTION */
+        .info-section {
+            background: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            cursor: pointer;
+        }
+
+        .info-icon {
+            width: 20px;
+            height: 20px;
+            color: #7C3AED;
+        }
+
+        .info-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            flex: 1;
+        }
+
+        .chevron-icon {
+            width: 20px;
+            height: 20px;
+            color: #6B7280;
+            transition: transform 0.2s;
+        }
+
+        .info-section.collapsed .chevron-icon {
+            transform: rotate(-90deg);
+        }
+
+        .info-content {
+            transition: all 0.3s;
+        }
+
+        .info-section.collapsed .info-content {
+            display: none;
+        }
+
+        .info-list {
+            list-style: none;
+        }
+
+        .info-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-bullet {
+            color: #00D084;
+            font-weight: 700;
+        }
+
+        /* MARKDOWN GUIDE */
+        .markdown-guide {
+            background: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #1E40AF;
+        }
+
+        .markdown-guide strong {
+            color: #1E3A8A;
+        }
+
+        /* AUTO-SAVE INDICATOR */
+        .autosave-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+        .autosave-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00D084;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M9 3v18"/>
+                </svg>
+                Workspace
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-label">Current Project</div>
+                <div class="project-dropdown">
+                    <div class="project-info">
+                        <h3>tseting this</h3>
+                        <p>research</p>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </div>
+            </div>
+
+            <nav class="sidebar-section">
+                <div class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                    Dashboard
+                </div>
+                <div class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                    Onboarding
+                </div>
+                <div class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                    </svg>
+                    Projects
+                </div>
+                <div class="nav-item active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    Activity Log
+                </div>
+                <div class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                    </svg>
+                    Editor
+                    <span class="badge">Admin</span>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v6m0 6v6m5.2-13.2l-1.4 1.4M8.2 8.2L6.8 6.8m8.4 8.4l1.4 1.4M6.8 17.2l1.4-1.4M19 12h-6M5 12H1"/>
+                    </svg>
+                    Settings
+                </div>
+                <div class="user-profile">
+                    <div class="user-avatar">W</div>
+                    <div class="project-info">
+                        <p style="font-size: 13px; font-weight: 500; color: #111827;">writingsbyali@gmail.com</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- BREADCRUMB -->
+            <nav class="breadcrumb">
+                <a href="#">Dashboard</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="#">Updates</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">New Update</span>
+            </nav>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header">
+                <h1>Share an Update</h1>
+                <p>Document your progress, share insights, or log what you learned.</p>
+            </div>
+
+            <!-- FORM -->
+            <form class="form-container">
+                <div class="form-section">
+                    <!-- UPDATE TITLE -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Update Title
+                            <span class="required-badge">Required</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-input" 
+                            placeholder="What did you work on or learn?"
+                            maxlength="150"
+                            id="updateTitle"
+                        >
+                        <div class="form-helper">
+                            <svg class="helper-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 16v-4M12 8h.01"/>
+                            </svg>
+                            <span>Write a clear, descriptive title. Example: "Week 1: Initial Data Analysis Complete" or "Breakthrough in Model Training"</span>
+                        </div>
+                        <div class="char-count" id="titleCount">0 / 150</div>
+                    </div>
+
+                    <!-- CONTENT WITH MARKDOWN EDITOR -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Content
+                            <span class="required-badge">Required</span>
+                        </label>
+                        <div class="editor-tabs">
+                            <button type="button" class="editor-tab active" data-tab="write">Write</button>
+                            <button type="button" class="editor-tab" data-tab="preview">Preview</button>
+                        </div>
+                        <div class="markdown-toolbar">
+                            <button type="button" class="toolbar-btn" title="Bold" data-action="bold">
+                                <strong>B</strong>
+                            </button>
+                            <button type="button" class="toolbar-btn" title="Italic" data-action="italic">
+                                <em>I</em>
+                            </button>
+                            <div class="toolbar-divider"></div>
+                            <button type="button" class="toolbar-btn" title="Heading" data-action="heading">
+                                H
+                            </button>
+                            <button type="button" class="toolbar-btn" title="Link" data-action="link">
+                                🔗
+                            </button>
+                            <button type="button" class="toolbar-btn" title="Code" data-action="code">
+                                &lt;/&gt;
+                            </button>
+                            <div class="toolbar-divider"></div>
+                            <button type="button" class="toolbar-btn" title="Bullet List" data-action="list">
+                                • List
+                            </button>
+                            <button type="button" class="toolbar-btn" title="Quote" data-action="quote">
+                                " Quote
+                            </button>
+                        </div>
+                        <textarea 
+                            class="form-input form-textarea with-toolbar" 
+                            placeholder="Describe your progress, insights, or learnings..."
+                            id="updateContent"
+                        ></textarea>
+                        <div class="preview-container" id="preview"></div>
+                        <div class="markdown-guide">
+                            <strong>Markdown supported:</strong> Use **bold**, *italic*, `code`, ### headings, [links](url), and more
+                        </div>
+                        <div class="char-count" id="contentCount">0 words</div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <!-- LINK TO PROJECT -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Link to Project
+                            <span class="optional-badge">Optional</span>
+                        </label>
+                        <select class="form-select" id="projectLink">
+                            <option value="">None (standalone update)</option>
+                            <option value="1">tseting this - research</option>
+                            <option value="2">Example Project Alpha</option>
+                            <option value="3">Example Project Beta</option>
+                        </select>
+                        <div class="form-helper">
+                            <svg class="helper-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 16v-4M12 8h.01"/>
+                            </svg>
+                            <span>Associate this update with a project to keep your work organized. You can also create standalone updates.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FORM ACTIONS -->
+                <div class="form-actions">
+                    <div class="actions-left">
+                        <button type="button" class="btn btn-ghost">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                                <polyline points="17 21 17 13 7 13 7 21"/>
+                                <polyline points="7 3 7 8 15 8"/>
+                            </svg>
+                            Save as Draft
+                        </button>
+                        <div class="autosave-indicator" style="display: none;">
+                            <div class="autosave-dot"></div>
+                            <span>Auto-saved</span>
+                        </div>
+                    </div>
+                    <div class="actions-right">
+                        <button type="button" class="btn btn-secondary">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                            </svg>
+                            Publish Update
+                            <span class="shortcut-hint">⌘↵</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- INFO SECTION -->
+            <div class="info-section">
+                <div class="info-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                    <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    <h3 class="info-title">Why Share Updates?</h3>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </div>
+                <div class="info-content">
+                    <ul class="info-list">
+                        <li class="info-item">
+                            <span class="info-bullet">•</span>
+                            <span>Document your learning journey for future reference and track your progress over time</span>
+                        </li>
+                        <li class="info-item">
+                            <span class="info-bullet">•</span>
+                            <span>Build a portfolio of your work and progress that showcases your research capabilities</span>
+                        </li>
+                        <li class="info-item">
+                            <span class="info-bullet">•</span>
+                            <span>Get feedback from collaborators and peers to improve your work and approach</span>
+                        </li>
+                        <li class="info-item">
+                            <span class="info-bullet">•</span>
+                            <span>Track patterns in your work over time to identify what strategies work best for you</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Character/word counters
+        const titleInput = document.getElementById('updateTitle');
+        const titleCount = document.getElementById('titleCount');
+        const contentInput = document.getElementById('updateContent');
+        const contentCount = document.getElementById('contentCount');
+
+        titleInput.addEventListener('input', (e) => {
+            const length = e.target.value.length;
+            titleCount.textContent = `${length} / 150`;
+            
+            if (length > 135) {
+                titleCount.style.color = '#DC2626';
+            } else if (length > 120) {
+                titleCount.style.color = '#F59E0B';
+            } else {
+                titleCount.style.color = '#9CA3AF';
+            }
+            
+            simulateAutosave();
+        });
+
+        contentInput.addEventListener('input', (e) => {
+            const words = e.target.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+            contentCount.textContent = `${words} word${words !== 1 ? 's' : ''}`;
+            
+            simulateAutosave();
+        });
+
+        // Markdown toolbar
+        const toolbarButtons = document.querySelectorAll('.toolbar-btn');
+        toolbarButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                const textarea = contentInput;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const selectedText = textarea.value.substring(start, end);
+                
+                let replacement = selectedText;
+                switch(action) {
+                    case 'bold':
+                        replacement = `**${selectedText || 'bold text'}**`;
+                        break;
+                    case 'italic':
+                        replacement = `*${selectedText || 'italic text'}*`;
+                        break;
+                    case 'heading':
+                        replacement = `### ${selectedText || 'Heading'}`;
+                        break;
+                    case 'link':
+                        replacement = `[${selectedText || 'link text'}](url)`;
+                        break;
+                    case 'code':
+                        replacement = `\`${selectedText || 'code'}\``;
+                        break;
+                    case 'list':
+                        replacement = `- ${selectedText || 'list item'}`;
+                        break;
+                    case 'quote':
+                        replacement = `> ${selectedText || 'quote'}`;
+                        break;
+                }
+                
+                textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+                textarea.focus();
+                textarea.selectionStart = start;
+                textarea.selectionEnd = start + replacement.length;
+                
+                contentInput.dispatchEvent(new Event('input'));
+            });
+        });
+
+        // Editor tabs (Write/Preview)
+        const editorTabs = document.querySelectorAll('.editor-tab');
+        const preview = document.getElementById('preview');
+        
+        editorTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                editorTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const tabType = tab.dataset.tab;
+                if (tabType === 'preview') {
+                    contentInput.style.display = 'none';
+                    preview.classList.add('active');
+                    // Simple markdown preview (just showing the text for demo)
+                    preview.innerHTML = contentInput.value
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/`(.*?)`/g, '<code>$1</code>')
+                        .replace(/### (.*?)$/gm, '<h3>$1</h3>')
+                        .replace(/\n/g, '<br>') || '<p style="color: #9CA3AF;">Nothing to preview yet...</p>';
+                } else {
+                    contentInput.style.display = 'block';
+                    preview.classList.remove('active');
+                }
+            });
+        });
+
+        // Auto-save simulation
+        let autosaveTimeout;
+        const autosaveIndicator = document.querySelector('.autosave-indicator');
+        
+        function simulateAutosave() {
+            clearTimeout(autosaveTimeout);
+            autosaveTimeout = setTimeout(() => {
+                autosaveIndicator.style.display = 'flex';
+                setTimeout(() => {
+                    autosaveIndicator.style.display = 'none';
+                }, 2000);
+            }, 1000);
+        }
+
+        // Form validation
+        const form = document.querySelector('form');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = titleInput.value.trim();
+            const content = contentInput.value.trim();
+            
+            let hasError = false;
+            
+            if (!title) {
+                titleInput.classList.add('error');
+                hasError = true;
+            } else {
+                titleInput.classList.remove('error');
+            }
+            
+            if (!content) {
+                contentInput.classList.add('error');
+                hasError = true;
+            } else {
+                contentInput.classList.remove('error');
+            }
+            
+            if (!hasError) {
+                alert('Update published successfully! (This is a demo)');
+            }
+        });
+
+        // Remove error on input
+        titleInput.addEventListener('input', () => titleInput.classList.remove('error'));
+        contentInput.addEventListener('input', () => contentInput.classList.remove('error'));
+
+        // Keyboard shortcut (Cmd/Ctrl + Enter to submit)
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Editor - Workspace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #F9FAFB;
+            color: #111827;
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        .editor-header {
+            background: white;
+            border-bottom: 1px solid #E5E7EB;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .back-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: #6B7280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #F3F4F6;
+            color: #111827;
+        }
+
+        .doc-title-input {
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            background: transparent;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            max-width: 400px;
+        }
+
+        .doc-title-input:hover {
+            background: #F3F4F6;
+        }
+
+        .doc-title-input:focus {
+            outline: none;
+            background: #F3F4F6;
+            box-shadow: 0 0 0 2px rgba(0, 208, 132, 0.1);
+        }
+
+        .doc-title-input::placeholder {
+            color: #9CA3AF;
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-toggle {
+            background: #F3F4F6;
+            border-radius: 8px;
+            padding: 4px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .view-btn {
+            padding: 6px 16px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: #6B7280;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .view-btn:hover {
+            color: #111827;
+        }
+
+        .view-btn.active {
+            background: white;
+            color: #00A368;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00D084;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-btn.secondary {
+            background: white;
+            color: #6B7280;
+            border: 1px solid #E5E7EB;
+        }
+
+        .header-btn.secondary:hover {
+            background: #F9FAFB;
+            border-color: #D1D5DB;
+        }
+
+        .header-btn.primary {
+            background: #00D084;
+            color: white;
+        }
+
+        .header-btn.primary:hover {
+            background: #00A368;
+        }
+
+        /* TOOLBAR */
+        .editor-toolbar {
+            background: white;
+            border-bottom: 1px solid #E5E7EB;
+            padding: 8px 24px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            overflow-x: auto;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 2px;
+            padding: 0 8px;
+            border-right: 1px solid #E5E7EB;
+        }
+
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .toolbar-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: #6B7280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .toolbar-btn:hover {
+            background: #F3F4F6;
+            color: #111827;
+        }
+
+        .toolbar-btn.active {
+            background: #E6F9F3;
+            color: #00A368;
+        }
+
+        .toolbar-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* MAIN EDITOR AREA */
+        .editor-main {
+            display: flex;
+            height: calc(100vh - 120px);
+            background: #F9FAFB;
+        }
+
+        /* SIDEBAR */
+        .editor-sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid #E5E7EB;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            padding: 20px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .sidebar-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6B7280;
+            margin-bottom: 12px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .sidebar-item:hover {
+            background: #F3F4F6;
+            color: #111827;
+        }
+
+        .sidebar-item.active {
+            background: #E6F9F3;
+            color: #00A368;
+        }
+
+        .outline-item {
+            padding: 6px 12px;
+            font-size: 13px;
+            color: #6B7280;
+            cursor: pointer;
+            border-left: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .outline-item:hover {
+            color: #111827;
+            border-left-color: #E5E7EB;
+        }
+
+        .outline-item.h1 {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .outline-item.h2 {
+            padding-left: 24px;
+            font-weight: 500;
+        }
+
+        .outline-item.h3 {
+            padding-left: 36px;
+        }
+
+        /* EDITOR CONTENT */
+        .editor-content {
+            flex: 1;
+            display: flex;
+            position: relative;
+        }
+
+        .editor-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .pane-header {
+            padding: 12px 24px;
+            border-bottom: 1px solid #E5E7EB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pane-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pane-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .pane-btn {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: none;
+            background: transparent;
+            color: #6B7280;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pane-btn:hover {
+            background: #F3F4F6;
+            color: #111827;
+        }
+
+        .editor-textarea {
+            flex: 1;
+            border: none;
+            padding: 24px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #111827;
+            resize: none;
+            background: white;
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+        }
+
+        .preview-pane {
+            padding: 24px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+
+        .preview-pane h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            color: #111827;
+        }
+
+        .preview-pane h1:first-child {
+            margin-top: 0;
+        }
+
+        .preview-pane h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            color: #111827;
+        }
+
+        .preview-pane h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: #111827;
+        }
+
+        .preview-pane p {
+            margin-bottom: 16px;
+            color: #374151;
+        }
+
+        .preview-pane code {
+            background: #F3F4F6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #DC2626;
+        }
+
+        .preview-pane pre {
+            background: #F3F4F6;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+
+        .preview-pane pre code {
+            background: none;
+            padding: 0;
+            color: #111827;
+        }
+
+        .preview-pane ul, .preview-pane ol {
+            margin-bottom: 16px;
+            padding-left: 24px;
+        }
+
+        .preview-pane li {
+            margin-bottom: 8px;
+        }
+
+        .preview-pane blockquote {
+            border-left: 4px solid #00D084;
+            padding-left: 16px;
+            margin: 16px 0;
+            color: #6B7280;
+            font-style: italic;
+        }
+
+        .preview-pane a {
+            color: #7C3AED;
+            text-decoration: none;
+        }
+
+        .preview-pane a:hover {
+            text-decoration: underline;
+        }
+
+        .preview-pane img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        /* DIVIDER */
+        .pane-divider {
+            width: 4px;
+            background: #E5E7EB;
+            cursor: col-resize;
+            transition: background 0.2s;
+        }
+
+        .pane-divider:hover {
+            background: #00D084;
+        }
+
+        /* FOOTER STATS */
+        .editor-footer {
+            background: white;
+            border-top: 1px solid #E5E7EB;
+            padding: 8px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+        .footer-stats {
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* FULLSCREEN MODE */
+        body.fullscreen .editor-sidebar {
+            display: none;
+        }
+
+        body.fullscreen .editor-header,
+        body.fullscreen .editor-toolbar {
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+
+        body.fullscreen .editor-header:hover,
+        body.fullscreen .editor-toolbar:hover {
+            opacity: 1;
+        }
+
+        /* TEMPLATE MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .modal-content {
+            padding: 24px;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .template-card {
+            border: 1.5px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .template-card:hover {
+            border-color: #00D084;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .template-name {
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .template-desc {
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+        /* KEYBOARD SHORTCUTS HELP */
+        .shortcuts-panel {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: none;
+            max-width: 300px;
+        }
+
+        .shortcuts-panel.active {
+            display: block;
+        }
+
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+        }
+
+        .shortcut-key {
+            background: #F3F4F6;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="editor-header">
+        <div class="header-left">
+            <button class="back-btn" title="Back to projects">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <input 
+                type="text" 
+                class="doc-title-input" 
+                placeholder="Untitled Document"
+                value="Research Notes: Week 1"
+            >
+        </div>
+        <div class="header-center">
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="edit">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                    </svg>
+                    Edit
+                </button>
+                <button class="view-btn" data-view="split">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <line x1="12" y1="3" x2="12" y2="21"/>
+                    </svg>
+                    Split
+                </button>
+                <button class="view-btn" data-view="preview">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    Preview
+                </button>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Saved</span>
+            </div>
+            <button class="header-btn secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="18" cy="5" r="3"/>
+                    <circle cx="6" cy="12" r="3"/>
+                    <circle cx="18" cy="19" r="3"/>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+                Share
+            </button>
+            <button class="header-btn primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                </svg>
+                Publish
+            </button>
+        </div>
+    </header>
+
+    <!-- TOOLBAR -->
+    <div class="editor-toolbar">
+        <div class="toolbar-group">
+            <button class="toolbar-btn" title="Bold (Cmd+B)" data-action="bold">
+                <strong>B</strong>
+            </button>
+            <button class="toolbar-btn" title="Italic (Cmd+I)" data-action="italic">
+                <em>I</em>
+            </button>
+            <button class="toolbar-btn" title="Strikethrough" data-action="strike">
+                <s>S</s>
+            </button>
+        </div>
+        <div class="toolbar-group">
+            <button class="toolbar-btn" title="Heading 1" data-action="h1">H1</button>
+            <button class="toolbar-btn" title="Heading 2" data-action="h2">H2</button>
+            <button class="toolbar-btn" title="Heading 3" data-action="h3">H3</button>
+        </div>
+        <div class="toolbar-group">
+            <button class="toolbar-btn" title="Bullet List" data-action="ul">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="8" y1="6" x2="21" y2="6"/>
+                    <line x1="8" y1="12" x2="21" y2="12"/>
+                    <line x1="8" y1="18" x2="21" y2="18"/>
+                    <line x1="3" y1="6" x2="3.01" y2="6"/>
+                    <line x1="3" y1="12" x2="3.01" y2="12"/>
+                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" title="Numbered List" data-action="ol">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="10" y1="6" x2="21" y2="6"/>
+                    <line x1="10" y1="12" x2="21" y2="12"/>
+                    <line x1="10" y1="18" x2="21" y2="18"/>
+                    <path d="M4 6h1v4M4 10h2M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" title="Todo List" data-action="todo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="5" width="6" height="6" rx="1"/>
+                    <path d="M6 10l2 2 4-4"/>
+                    <line x1="12" y1="8" x2="21" y2="8"/>
+                </svg>
+            </button>
+        </div>
+        <div class="toolbar-group">
+            <button class="toolbar-btn" title="Link (Cmd+K)" data-action="link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" title="Image" data-action="image">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" title="Code Block" data-action="code">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6"/>
+                    <polyline points="8 6 2 12 8 18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="toolbar-group">
+            <button class="toolbar-btn" title="Quote" data-action="quote">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+                    <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" title="Divider" data-action="hr">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="toolbar-group">
+            <button class="toolbar-btn" title="Insert Template" data-action="template">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="12" y1="18" x2="12" y2="12"/>
+                    <line x1="9" y1="15" x2="15" y2="15"/>
+                </svg>
+            </button>
+            <button class="toolbar-btn" title="Fullscreen (F11)" data-action="fullscreen">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN EDITOR AREA -->
+    <div class="editor-main">
+        <!-- SIDEBAR -->
+        <aside class="editor-sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Navigation</div>
+                <div class="sidebar-item active">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    Content
+                </div>
+                <div class="sidebar-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    History
+                </div>
+                <div class="sidebar-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                    </svg>
+                    Comments
+                </div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">Outline</div>
+                <div class="outline-item h1">Introduction</div>
+                <div class="outline-item h2">Background</div>
+                <div class="outline-item h2">Objectives</div>
+                <div class="outline-item h1">Methodology</div>
+                <div class="outline-item h2">Data Collection</div>
+                <div class="outline-item h3">Primary Sources</div>
+                <div class="outline-item h3">Secondary Sources</div>
+                <div class="outline-item h1">Results</div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">Quick Insert</div>
+                <div class="sidebar-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Citation
+                </div>
+                <div class="sidebar-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M3 9h18M9 21V9"/>
+                    </svg>
+                    Table
+                </div>
+                <div class="sidebar-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+                    Chart
+                </div>
+            </div>
+        </aside>
+
+        <!-- CONTENT AREA -->
+        <div class="editor-content">
+            <div class="editor-pane" id="editPane">
+                <div class="pane-header">
+                    <div class="pane-title">Markdown</div>
+                    <div class="pane-actions">
+                        <button class="pane-btn" title="Word wrap">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="4 7 4 4 20 4 20 7"/>
+                                <line x1="9" y1="20" x2="15" y2="20"/>
+                                <line x1="12" y1="4" x2="12" y2="20"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <textarea class="editor-textarea" id="editor" placeholder="Start writing..."># Introduction
+
+This is my research notes for Week 1. I'm exploring the intersection of AI safety and responsible disclosure practices.
+
+## Background
+
+Recent developments in AI systems have raised important questions about:
+
+- How to balance innovation with safety
+- The role of responsible disclosure
+- Community engagement in safety research
+
+## Key Findings
+
+After reviewing the literature, I found several interesting patterns:
+
+1. Most papers focus on **technical solutions**
+2. Few address *governance* aspects
+3. There's a gap in practical guidelines
+
+> "The best way to predict the future is to invent it." - Alan Kay
+
+## Next Steps
+
+- [ ] Review safety frameworks
+- [ ] Interview researchers
+- [ ] Draft initial recommendations
+
+---
+
+More content to follow...</textarea>
+            </div>
+
+            <div class="pane-divider"></div>
+
+            <div class="editor-pane" id="previewPane" style="display: none;">
+                <div class="pane-header">
+                    <div class="pane-title">Preview</div>
+                    <div class="pane-actions">
+                        <button class="pane-btn" title="Export">PDF</button>
+                    </div>
+                </div>
+                <div class="preview-pane" id="preview">
+                    <h1>Introduction</h1>
+                    <p>This is my research notes for Week 1. I'm exploring the intersection of AI safety and responsible disclosure practices.</p>
+                    <h2>Background</h2>
+                    <p>Recent developments in AI systems have raised important questions about:</p>
+                    <ul>
+                        <li>How to balance innovation with safety</li>
+                        <li>The role of responsible disclosure</li>
+                        <li>Community engagement in safety research</li>
+                    </ul>
+                    <h2>Key Findings</h2>
+                    <p>After reviewing the literature, I found several interesting patterns:</p>
+                    <ol>
+                        <li>Most papers focus on <strong>technical solutions</strong></li>
+                        <li>Few address <em>governance</em> aspects</li>
+                        <li>There's a gap in practical guidelines</li>
+                    </ol>
+                    <blockquote>"The best way to predict the future is to invent it." - Alan Kay</blockquote>
+                    <h2>Next Steps</h2>
+                    <ul>
+                        <li>Review safety frameworks</li>
+                        <li>Interview researchers</li>
+                        <li>Draft initial recommendations</li>
+                    </ul>
+                    <hr>
+                    <p>More content to follow...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="editor-footer">
+        <div class="footer-stats">
+            <div class="stat-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                <span id="wordCount">234 words</span>
+            </div>
+            <div class="stat-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="4 17 10 11 4 5"/>
+                    <line x1="12" y1="19" x2="20" y2="19"/>
+                </svg>
+                <span id="charCount">1,456 characters</span>
+            </div>
+            <div class="stat-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>~5 min read</span>
+            </div>
+        </div>
+        <div class="footer-actions">
+            <button class="pane-btn" id="shortcutsBtn">Keyboard Shortcuts</button>
+        </div>
+    </div>
+
+    <!-- TEMPLATE MODAL -->
+    <div class="modal-overlay" id="templateModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Insert Template</h2>
+            </div>
+            <div class="modal-content">
+                <div class="template-grid">
+                    <div class="template-card" data-template="research-note">
+                        <div class="template-name">Research Note</div>
+                        <div class="template-desc">Document findings, observations, and insights</div>
+                    </div>
+                    <div class="template-card" data-template="experiment">
+                        <div class="template-name">Experiment Log</div>
+                        <div class="template-desc">Track hypothesis, methods, and results</div>
+                    </div>
+                    <div class="template-card" data-template="literature-review">
+                        <div class="template-name">Literature Review</div>
+                        <div class="template-desc">Analyze and summarize research papers</div>
+                    </div>
+                    <div class="template-card" data-template="meeting-notes">
+                        <div class="template-name">Meeting Notes</div>
+                        <div class="template-desc">Capture discussions and action items</div>
+                    </div>
+                    <div class="template-card" data-template="weekly-update">
+                        <div class="template-name">Weekly Update</div>
+                        <div class="template-desc">Share progress and learnings</div>
+                    </div>
+                    <div class="template-card" data-template="blank">
+                        <div class="template-name">Blank Document</div>
+                        <div class="template-desc">Start from scratch</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KEYBOARD SHORTCUTS PANEL -->
+    <div class="shortcuts-panel" id="shortcutsPanel">
+        <div style="font-weight: 600; margin-bottom: 12px;">Keyboard Shortcuts</div>
+        <div class="shortcut-item">
+            <span>Bold</span>
+            <span class="shortcut-key">⌘ B</span>
+        </div>
+        <div class="shortcut-item">
+            <span>Italic</span>
+            <span class="shortcut-key">⌘ I</span>
+        </div>
+        <div class="shortcut-item">
+            <span>Link</span>
+            <span class="shortcut-key">⌘ K</span>
+        </div>
+        <div class="shortcut-item">
+            <span>Save</span>
+            <span class="shortcut-key">⌘ S</span>
+        </div>
+        <div class="shortcut-item">
+            <span>Fullscreen</span>
+            <span class="shortcut-key">F11</span>
+        </div>
+        <div class="shortcut-item">
+            <span>Preview</span>
+            <span class="shortcut-key">⌘ ⇧ P</span>
+        </div>
+    </div>
+
+    <script>
+        const editor = document.getElementById('editor');
+        const preview = document.getElementById('preview');
+        const editPane = document.getElementById('editPane');
+        const previewPane = document.getElementById('previewPane');
+        const wordCount = document.getElementById('wordCount');
+        const charCount = document.getElementById('charCount');
+
+        // View toggle
+        const viewBtns = document.querySelectorAll('.view-btn');
+        viewBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                viewBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const view = btn.dataset.view;
+                if (view === 'edit') {
+                    editPane.style.display = 'flex';
+                    previewPane.style.display = 'none';
+                    document.querySelector('.pane-divider').style.display = 'none';
+                } else if (view === 'preview') {
+                    editPane.style.display = 'none';
+                    previewPane.style.display = 'flex';
+                    document.querySelector('.pane-divider').style.display = 'none';
+                    updatePreview();
+                } else if (view === 'split') {
+                    editPane.style.display = 'flex';
+                    previewPane.style.display = 'flex';
+                    document.querySelector('.pane-divider').style.display = 'block';
+                    updatePreview();
+                }
+            });
+        });
+
+        // Toolbar actions
+        const toolbarBtns = document.querySelectorAll('.toolbar-btn');
+        toolbarBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                insertMarkdown(action);
+            });
+        });
+
+        function insertMarkdown(type) {
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            const selectedText = editor.value.substring(start, end);
+            let replacement = selectedText;
+
+            switch(type) {
+                case 'bold':
+                    replacement = `**${selectedText || 'bold text'}**`;
+                    break;
+                case 'italic':
+                    replacement = `*${selectedText || 'italic text'}*`;
+                    break;
+                case 'strike':
+                    replacement = `~~${selectedText || 'strikethrough'}~~`;
+                    break;
+                case 'h1':
+                    replacement = `# ${selectedText || 'Heading 1'}`;
+                    break;
+                case 'h2':
+                    replacement = `## ${selectedText || 'Heading 2'}`;
+                    break;
+                case 'h3':
+                    replacement = `### ${selectedText || 'Heading 3'}`;
+                    break;
+                case 'ul':
+                    replacement = `- ${selectedText || 'list item'}`;
+                    break;
+                case 'ol':
+                    replacement = `1. ${selectedText || 'list item'}`;
+                    break;
+                case 'todo':
+                    replacement = `- [ ] ${selectedText || 'task'}`;
+                    break;
+                case 'link':
+                    replacement = `[${selectedText || 'link text'}](url)`;
+                    break;
+                case 'image':
+                    replacement = `![alt text](image-url)`;
+                    break;
+                case 'code':
+                    replacement = `\`\`\`\n${selectedText || 'code'}\n\`\`\``;
+                    break;
+                case 'quote':
+                    replacement = `> ${selectedText || 'quote'}`;
+                    break;
+                case 'hr':
+                    replacement = '\n---\n';
+                    break;
+                case 'template':
+                    document.getElementById('templateModal').classList.add('active');
+                    return;
+                case 'fullscreen':
+                    document.body.classList.toggle('fullscreen');
+                    return;
+            }
+
+            editor.value = editor.value.substring(0, start) + replacement + editor.value.substring(end);
+            editor.focus();
+            editor.selectionStart = start;
+            editor.selectionEnd = start + replacement.length;
+            
+            updateStats();
+            updatePreview();
+        }
+
+        // Update stats
+        function updateStats() {
+            const text = editor.value;
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+            const chars = text.length;
+            
+            wordCount.textContent = `${words} word${words !== 1 ? 's' : ''}`;
+            charCount.textContent = `${chars.toLocaleString()} character${chars !== 1 ? 's' : ''}`;
+        }
+
+        // Update preview
+        function updatePreview() {
+            const markdown = editor.value;
+            // Simple markdown to HTML (for demo - use a real markdown library in production)
+            let html = markdown
+                .replace(/### (.*?)$/gm, '<h3>$1</h3>')
+                .replace(/## (.*?)$/gm, '<h2>$1</h2>')
+                .replace(/# (.*?)$/gm, '<h1>$1</h1>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/~~(.*?)~~/g, '<del>$1</del>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                .replace(/^> (.*?)$/gm, '<blockquote>$1</blockquote>')
+                .replace(/^- \[ \] (.*?)$/gm, '<input type="checkbox"> $1<br>')
+                .replace(/^- \[x\] (.*?)$/gm, '<input type="checkbox" checked> $1<br>')
+                .replace(/^- (.*?)$/gm, '<li>$1</li>')
+                .replace(/^(\d+)\. (.*?)$/gm, '<li>$2</li>')
+                .replace(/^---$/gm, '<hr>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+            
+            preview.innerHTML = '<p>' + html + '</p>';
+        }
+
+        // Live update
+        editor.addEventListener('input', () => {
+            updateStats();
+            if (previewPane.style.display !== 'none') {
+                updatePreview();
+            }
+        });
+
+        // Template modal
+        const templateModal = document.getElementById('templateModal');
+        const templateCards = document.querySelectorAll('.template-card');
+        
+        templateCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const template = card.dataset.template;
+                insertTemplate(template);
+                templateModal.classList.remove('active');
+            });
+        });
+
+        templateModal.addEventListener('click', (e) => {
+            if (e.target === templateModal) {
+                templateModal.classList.remove('active');
+            }
+        });
+
+        function insertTemplate(type) {
+            let template = '';
+            switch(type) {
+                case 'research-note':
+                    template = `# Research Note: [Title]
+
+**Date:** ${new Date().toLocaleDateString()}
+**Project:** 
+**Tags:** 
+
+## Context
+
+[What question are you exploring? What prompted this note?]
+
+## Key Findings
+
+- Finding 1
+- Finding 2
+- Finding 3
+
+## Analysis
+
+[Your interpretation and insights]
+
+## Next Steps
+
+- [ ] Action item 1
+- [ ] Action item 2
+
+## References
+
+- Reference 1
+- Reference 2`;
+                    break;
+                case 'experiment':
+                    template = `# Experiment: [Title]
+
+**Date:** ${new Date().toLocaleDateString()}
+**Hypothesis:** 
+
+## Methodology
+
+### Setup
+[Describe your experimental setup]
+
+### Procedure
+1. Step 1
+2. Step 2
+3. Step 3
+
+## Results
+
+[Document your observations and data]
+
+## Analysis
+
+[Interpret your results]
+
+## Conclusions
+
+[What did you learn? Does it support your hypothesis?]
+
+## Future Work
+
+- [ ] Follow-up experiment 1
+- [ ] Follow-up experiment 2`;
+                    break;
+            }
+            editor.value = template;
+            updateStats();
+            updatePreview();
+        }
+
+        // Keyboard shortcuts
+        const shortcutsBtn = document.getElementById('shortcutsBtn');
+        const shortcutsPanel = document.getElementById('shortcutsPanel');
+        
+        shortcutsBtn.addEventListener('click', () => {
+            shortcutsPanel.classList.toggle('active');
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
+                e.preventDefault();
+                insertMarkdown('bold');
+            } else if ((e.metaKey || e.ctrlKey) && e.key === 'i') {
+                e.preventDefault();
+                insertMarkdown('italic');
+            } else if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                insertMarkdown('link');
+            } else if (e.key === 'F11') {
+                e.preventDefault();
+                insertMarkdown('fullscreen');
+            }
+        });
+
+        // Initial stats
+        updateStats();
+    </script>
+</body>
+</html>

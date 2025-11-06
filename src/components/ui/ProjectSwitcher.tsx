@@ -41,7 +41,7 @@ export default function ProjectSwitcher({ projects }: ProjectSwitcherProps) {
   if (projects.length === 0) {
     return (
       <div className="px-4 py-3 border-b border-base-300">
-        <a href="/projects/new" className="btn btn-sm bg-[#22c55e] hover:bg-[#16a34a] text-white border-0 w-full">
+        <a href="/projects/new" className="btn btn-sm bg-personal-primary hover:bg-personal-primary-hover text-white border-0 w-full">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
