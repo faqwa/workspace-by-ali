@@ -209,6 +209,166 @@ export interface Database {
           created_at?: string
         }
       }
+      workspace_settings: {
+        Row: {
+          id: string
+          owner_id: string
+          workspace_name: string
+          repo_visibility: 'public' | 'private'
+          reader_signup_enabled: boolean
+          readers_can_suggest: boolean
+          setup_completed: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          owner_id: string
+          workspace_name: string
+          repo_visibility?: 'public' | 'private'
+          reader_signup_enabled?: boolean
+          readers_can_suggest?: boolean
+          setup_completed?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          owner_id?: string
+          workspace_name?: string
+          repo_visibility?: 'public' | 'private'
+          reader_signup_enabled?: boolean
+          readers_can_suggest?: boolean
+          setup_completed?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      user_roles: {
+        Row: {
+          id: string
+          user_id: string
+          workspace_owner_id: string
+          role: 'owner' | 'reader'
+          is_expert: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          workspace_owner_id: string
+          role?: 'owner' | 'reader'
+          is_expert?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          workspace_owner_id?: string
+          role?: 'owner' | 'reader'
+          is_expert?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      reader_acknowledgments: {
+        Row: {
+          id: string
+          reader_id: string
+          subproject_id: string
+          protocol_version: string
+          acknowledged_at: string
+          ip_address: string | null
+        }
+        Insert: {
+          id?: string
+          reader_id: string
+          subproject_id: string
+          protocol_version: string
+          acknowledged_at?: string
+          ip_address?: string | null
+        }
+        Update: {
+          id?: string
+          reader_id?: string
+          subproject_id?: string
+          protocol_version?: string
+          acknowledged_at?: string
+          ip_address?: string | null
+        }
+      }
+      reader_suggestions: {
+        Row: {
+          id: string
+          reader_id: string
+          subproject_id: string
+          suggestion_text: string
+          status: 'pending' | 'accepted' | 'rejected'
+          created_at: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+        }
+        Insert: {
+          id?: string
+          reader_id: string
+          subproject_id: string
+          suggestion_text: string
+          status?: 'pending' | 'accepted' | 'rejected'
+          created_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+        }
+        Update: {
+          id?: string
+          reader_id?: string
+          subproject_id?: string
+          suggestion_text?: string
+          status?: 'pending' | 'accepted' | 'rejected'
+          created_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+        }
+      }
+      user_repos: {
+        Row: {
+          id: string
+          user_id: string
+          repo_url: string
+          repo_owner: string
+          repo_name: string
+          github_token_encrypted: string | null
+          default_branch: string
+          is_template_forked: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          repo_url: string
+          repo_owner: string
+          repo_name: string
+          github_token_encrypted?: string | null
+          default_branch?: string
+          is_template_forked?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          repo_url?: string
+          repo_owner?: string
+          repo_name?: string
+          github_token_encrypted?: string | null
+          default_branch?: string
+          is_template_forked?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

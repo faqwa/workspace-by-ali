@@ -14,13 +14,13 @@
  */
 
 import type { APIRoute } from 'astro';
-import { createServerSupabaseClient } from '../../../lib/supabaseServer';
+import { createSupabaseServer } from '../../../lib/supabaseServer';
 import { decryptToken } from '../../../lib/tokenEncryption';
 
-export const GET: APIRoute = async ({ request, cookies }) => {
+export const GET: APIRoute = async ({ cookies }) => {
   try {
     // 1. Authenticate user
-    const supabase = createServerSupabaseClient(cookies);
+    const supabase = createSupabaseServer(cookies);
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
