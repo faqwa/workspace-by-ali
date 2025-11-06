@@ -1,212 +1,156 @@
 ---
-import DashboardLayout from '../components/DashboardLayout.astro';
-import { DashboardStats } from '../components/DashboardStats';
+import DashboardLayout from '../components/layouts/DashboardLayout.astro';
+import StatCard from '../components/ui/StatCard';
+import ActivityLog from '../components/ui/ActivityLog';
+import { createSupabaseServer } from '../lib/supabaseServer';
 
-// Get user from middleware (if authenticated)
-const user = Astro.locals.user;
+// Get user
+const supabase = createSupabaseServer(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
 
-// If not authenticated, redirect to login
 if (!user) {
   return Astro.redirect('/login');
 }
 
-// TODO: Fetch real stats from database
-// For now, show mock stats
+// Get user's first name or email
+const userName = user.user_metadata?.name?.split(' ')[0] || user.email?.split('@')[0] || 'there';
+
+// Fetch real data from database
+const { data: projects } = await supabase
+  .from('projects')
+  .select('id')
+  .eq('owner', user.id);
+
+const { data: activities } = await supabase
+  .from('activities')
+  .select('*, projects(name)')
+  .eq('user_id', user.id)
+  .order('created_at', { ascending: false })
+  .limit(10);
+
+const { data: streams } = await supabase
+  .from('streams')
+  .select('id, project_id')
+  .in('project_id', (projects || []).map(p => p.id));
+
+// Calculate stats (handle null values from failed queries)
 const stats = {
-  totalProjects: 0,
-  activeStreams: 0,
-  submissions: 0,
-  collaborators: 1,
+  projects: projects?.length || 0,
+  updates: activities?.length || 0,
+  streams: streams?.length || 0,
+  collaborators: 0, // TODO: Implement collaborators feature
 };
+
+// Transform activities for ActivityLog component
+const recentActivities = (activities || []).slice(0, 5).map((activity) => ({
+  id: activity.id,
+  title: activity.title,
+  description: activity.content?.substring(0, 150),
+  timestamp: new Date(activity.created_at),
+  type: activity.type || 'update',
+}));
 ---
 
-<DashboardLayout title="Dashboard — Workspace" user={user} currentPath="/">
-  <div class="px-4 sm:px-6 lg:px-8 pt-8 pb-12">
-    <!-- Welcome Header -->
-    <header class="welcome-header">
-      <div>
-        <h1>Welcome back, {user.email?.split('@')[0]}!</h1>
-        <p class="subtitle">Here's an overview of your workspace</p>
-      </div>
-    </header>
+<DashboardLayout title="Dashboard - Workspace">
+  <!-- Welcome Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-base-content mb-2">
+      Welcome back, {userName}! 👋
+    </h1>
+    <p class="text-base-content/60">
+      Here's what's happening with your workspace today.
+    </p>
+  </div>
 
-    <!-- Dashboard Stats -->
-    <DashboardStats stats={stats} client:load />
+  <!-- Stats Grid -->
+  <div class="stats stats-vertical lg:stats-horizontal shadow w-full mb-8">
+    <StatCard
+      client:load
+      title="Projects"
+      value={stats.projects}
+      description="Active research projects"
+    />
 
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-      <h2>Quick Actions</h2>
-      <div class="actions-grid">
-        <a href="/projects" class="action-card">
-          <div class="action-icon">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+    <StatCard
+      client:load
+      title="Updates"
+      value={stats.updates}
+      description="Published this month"
+      trend={{ value: 20, isPositive: true }}
+    />
+
+    <StatCard
+      client:load
+      title="Streams"
+      value={stats.streams}
+      description="Active streams"
+    />
+
+    <StatCard
+      client:load
+      title="Collaborators"
+      value={stats.collaborators}
+      description="Team members"
+    />
+  </div>
+
+  <!-- Grid Layout for Content -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Recent Updates (Takes 2 columns) -->
+    <div class="lg:col-span-2">
+      <div class="card bg-base-100 shadow">
+        <div class="card-body">
+          <h2 class="card-title">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-          </div>
-          <h3>View Projects</h3>
-          <p>Browse and manage your research projects</p>
-        </a>
-
-        <button class="action-card" id="create-project">
-          <div class="action-icon">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-          </div>
-          <h3>New Project</h3>
-          <p>Start a new research project</p>
-        </button>
-
-        <a href="/updates" class="action-card">
-          <div class="action-icon">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" />
-            </svg>
-          </div>
-          <h3>View Updates</h3>
-          <p>Check recent project updates and notes</p>
-        </a>
-
-        <button class="action-card" id="create-stream">
-          <div class="action-icon">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-            </svg>
-          </div>
-          <h3>New Stream</h3>
-          <p>Create a new work stream</p>
-        </button>
+            Recent Updates
+          </h2>
+          <ActivityLog client:load activities={recentActivities} limit={4} />
+        </div>
       </div>
     </div>
 
-    <!-- Recent Activity (placeholder) -->
-    <div class="recent-activity">
-      <h2>Recent Activity</h2>
-      <div class="activity-placeholder">
-        <p>No recent activity yet. Start by creating your first project!</p>
+    <!-- Quick Actions -->
+    <div class="lg:col-span-1">
+      <div class="card bg-base-100 shadow mb-6">
+        <div class="card-body">
+          <h2 class="card-title text-base">Quick Actions</h2>
+          <div class="flex flex-col gap-2 mt-2">
+            <a href="/projects/new" class="btn btn-sm bg-[#22c55e] hover:bg-[#16a34a] text-white border-0">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              New Project
+            </a>
+            <a href="/updates/new" class="btn btn-sm bg-[#22c55e] hover:bg-[#16a34a] text-white border-0">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+              </svg>
+              New Update
+            </a>
+            <a href="/projects" class="btn btn-ghost btn-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+              </svg>
+              View Projects
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tips Card -->
+      <div class="card bg-[#22c55e] text-white">
+        <div class="card-body">
+          <h3 class="card-title text-base">Getting Started</h3>
+          <p class="text-sm opacity-90">
+            Create your first project to start organizing your research and updates.
+          </p>
+          <div class="card-actions justify-end mt-2">
+            <a href="/docs" class="btn btn-sm bg-white/20 hover:bg-white/30 text-white border-0">Learn More</a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </DashboardLayout>
-
-<style>
-  .welcome-header {
-    margin-bottom: 3rem;
-  }
-
-  h1 {
-    margin: 0 0 0.5rem;
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--text-1);
-    letter-spacing: -0.02em;
-  }
-
-  .subtitle {
-    margin: 0;
-    color: var(--text-4);
-    font-size: 1.1rem;
-  }
-
-  h2 {
-    margin: 0 0 1.5rem;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text-1);
-  }
-
-  .quick-actions {
-    margin-top: 4rem;
-  }
-
-  .actions-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .action-card {
-    background: var(--elev-2);
-    border: 1px solid var(--border-2);
-    border-radius: var(--radius-md);
-    padding: 2rem;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    text-align: center;
-  }
-
-  .action-card:hover {
-    background: var(--elev-3);
-    border-color: var(--brand);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-1);
-  }
-
-  .action-icon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 1rem;
-    background: var(--brand);
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-  }
-
-  .action-card h3 {
-    margin: 0 0 0.5rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text-1);
-  }
-
-  .action-card p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--text-4);
-  }
-
-  .recent-activity {
-    margin-top: 4rem;
-  }
-
-  .activity-placeholder {
-    background: var(--elev-2);
-    border: 1px dashed var(--border-3);
-    border-radius: var(--radius-md);
-    padding: 3rem;
-    text-align: center;
-  }
-
-  .activity-placeholder p {
-    margin: 0;
-    color: var(--text-4);
-    font-size: 1rem;
-  }
-
-  @media (max-width: 768px) {
-    h1 {
-      font-size: 2rem;
-    }
-
-    .actions-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>
-
-<script>
-  const createProjectBtn = document.getElementById('create-project');
-  const createStreamBtn = document.getElementById('create-stream');
-
-  createProjectBtn?.addEventListener('click', () => {
-    alert('Project creation coming soon!');
-  });
-
-  createStreamBtn?.addEventListener('click', () => {
-    alert('Stream creation coming soon!');
-  });
-</script>

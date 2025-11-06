@@ -1,177 +1,93 @@
 ---
-import DashboardLayout from '../components/DashboardLayout.astro';
-import { DashboardStats } from '../components/DashboardStats';
+import DashboardLayout from '../components/layouts/DashboardLayout.astro';
+import EmptyState from '../components/ui/EmptyState';
+import ProjectCard from '../components/ui/ProjectCard';
+import { createSupabaseServer } from '../lib/supabaseServer';
 
-// User is guaranteed to exist here - middleware protects this route
-const user = Astro.locals.user!;
+// Get user
+const supabase = createSupabaseServer(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
 
-// TODO: Fetch user's projects from database
-// For now, show empty state with mock stats
-const projects = [];
+if (!user) {
+  return Astro.redirect('/login');
+}
 
-// Mock stats for now - will be replaced with real data
-const stats = {
-  totalProjects: 0,
-  activeStreams: 0,
-  submissions: 0,
-  collaborators: 1, // Just the user themselves for now
-};
+// Fetch projects from database
+const { data: projects, error: projectsError } = await supabase
+  .from('projects')
+  .select('*')
+  .eq('owner', user.id)
+  .order('created_at', { ascending: false });
+
+if (projectsError) {
+  console.error('Error fetching projects:', projectsError);
+}
+
+const publicProjects = (projects || []).filter(p => p.visibility === 'public');
+const privateProjects = (projects || []).filter(p => p.visibility === 'private');
 ---
 
-<DashboardLayout title="Projects — Workspace" user={user} currentPath="/projects">
-  <div class="px-4 sm:px-6 lg:px-8 pt-8 pb-12">
-    <!-- Dashboard Stats -->
-    <DashboardStats stats={stats} client:load />
+<DashboardLayout title="Projects - Workspace">
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-base-content mb-2">
+        Projects
+      </h1>
+      <p class="text-base-content/60">
+        Manage your research projects and workspaces
+      </p>
+    </div>
 
-    <!-- Projects Section -->
-    <header class="page-header">
-      <div>
-        <h1>My Projects</h1>
-        <p class="subtitle">Manage your research and build logs</p>
-      </div>
-      <button class="create-button" id="create-project-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        New Project
-      </button>
-    </header>
-
-    {projects.length === 0 ? (
-      <div class="empty-state">
-        <div class="empty-icon">📁</div>
-        <h2>No projects yet</h2>
-        <p>Create your first project to start documenting your research</p>
-        <button class="create-button-large">
-          Create Your First Project
-        </button>
-      </div>
-    ) : (
-      <div class="projects-grid">
-        {/* Projects will be mapped here */}
-      </div>
-    )}
+    <a href="/projects/new" class="btn bg-[#22c55e] hover:bg-[#16a34a] text-white border-0">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+      New Project
+    </a>
   </div>
+
+  <!-- Stats Summary -->
+  <div class="stats shadow mb-8 w-full">
+    <div class="stat">
+      <div class="stat-title">Total Projects</div>
+      <div class="stat-value text-primary">{projects?.length || 0}</div>
+      <div class="stat-desc">Active workspaces</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title">Public</div>
+      <div class="stat-value text-secondary">{publicProjects.length}</div>
+      <div class="stat-desc">Visible to everyone</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title">Private</div>
+      <div class="stat-value text-accent">{privateProjects.length}</div>
+      <div class="stat-desc">Only you can see</div>
+    </div>
+  </div>
+
+  <!-- Projects Grid -->
+  {projects && projects.length > 0 ? (
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {projects.map((project) => (
+        <ProjectCard client:load project={project} />
+      ))}
+    </div>
+  ) : (
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <EmptyState
+          client:load
+          title="No projects yet"
+          description="Create your first project to start organizing your research and updates."
+          action={{
+            label: "Create Your First Project",
+            href: "/projects/new"
+          }}
+        />
+      </div>
+    </div>
+  )}
 </DashboardLayout>
-
-<style>
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 3rem;
-    gap: 2rem;
-  }
-
-  h1 {
-    margin: 0 0 0.5rem;
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: var(--text-1);
-    letter-spacing: -0.02em;
-  }
-
-  .subtitle {
-    margin: 0;
-    color: var(--text-4);
-    font-size: 1rem;
-  }
-
-  .create-button {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--brand);
-    color: white;
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 0.75rem 1.25rem;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-  }
-
-  .create-button:hover {
-    background: var(--brand-2);
-    transform: translateY(-1px);
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 6rem 2rem;
-    background: var(--elev-2);
-    border: 1px dashed var(--border-3);
-    border-radius: var(--radius-md);
-    margin-top: 2rem;
-  }
-
-  .empty-icon {
-    font-size: 4rem;
-    margin-bottom: 1.5rem;
-    opacity: 0.5;
-  }
-
-  .empty-state h2 {
-    margin: 0 0 0.75rem;
-    font-size: 1.5rem;
-    color: var(--text-1);
-  }
-
-  .empty-state p {
-    margin: 0 0 2rem;
-    color: var(--text-4);
-    font-size: 1.05rem;
-  }
-
-  .create-button-large {
-    background: var(--brand);
-    color: white;
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 1rem 2rem;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .create-button-large:hover {
-    background: var(--brand-2);
-    transform: translateY(-2px);
-  }
-
-  .projects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
-  }
-
-  @media (max-width: 768px) {
-    .page-header {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    h1 {
-      font-size: 1.8rem;
-    }
-
-    .create-button {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-</style>
-
-<script>
-  // TODO: Implement project creation modal
-  const createButtons = document.querySelectorAll('.create-button, .create-button-large');
-  createButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      alert('Project creation modal coming soon!');
-    });
-  });
-</script>

@@ -1,21 +1,24 @@
 # Workspace by Ali
 
-A collaborative workspace platform for managing projects, streams, and creative work. Built with Astro 5, Supabase, and modern web technologies.
+A collaborative workspace platform for managing projects, updates, and creative work. Built with Astro 5, Supabase, Keystatic CMS, and modern web technologies.
 
 ## Features
 
-- **Secure Authentication**: Email/password and OAuth support with Supabase
-- **Project Management**: Create, organize, and track creative projects
-- **Stream-based Workflows**: Organize work into streams with submission tracking
-- **Dashboard Analytics**: Visualize project activity and metrics (coming soon)
-- **Responsive Design**: Mobile-first UI built with Tailwind CSS
+- **Secure Authentication**: Email/password and GitHub OAuth with Supabase
+- **Project Management**: Create, organize, and track creative projects with GitHub integration
+- **Content Management**: Keystatic CMS for managing updates and content
+- **GitHub Integration**: Connect repositories and sync project activities
+- **Updates System**: Share project updates and progress with the community
+- **Responsive Design**: Mobile-first UI built with Tailwind CSS and DaisyUI
 
 ## Tech Stack
 
 - **Framework**: [Astro 5](https://astro.build) - Fast, modern web framework
-- **Authentication**: [Supabase Auth](https://supabase.com/auth) - Secure user management
+- **Authentication**: [Supabase Auth](https://supabase.com/auth) - Secure user management with OAuth
 - **Database**: [Supabase](https://supabase.com) - PostgreSQL with real-time capabilities
-- **UI Components**: [Tremor](https://tremor.so) - Dashboard and data visualization
+- **CMS**: [Keystatic](https://keystatic.com) - Git-based content management
+- **GitHub API**: [Octokit](https://github.com/octokit/octokit.js) - GitHub integration and repository management
+- **UI Components**: [Tremor](https://tremor.so) & [DaisyUI](https://daisyui.com) - Dashboard and UI components
 - **Styling**: [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
 - **Deployment**: [Vercel](https://vercel.com) - Serverless deployment
 
@@ -45,10 +48,13 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` and add your Supabase credentials:
-- `PUBLIC_SUPABASE_URL`
-- `PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
+Edit `.env` and add your credentials:
+- `PUBLIC_SUPABASE_URL` - Your Supabase project URL
+- `PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
+- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key
+- `GITHUB_CLIENT_ID` - GitHub OAuth app client ID
+- `GITHUB_CLIENT_SECRET` - GitHub OAuth app secret
+- `ENCRYPTION_SECRET` - Secret key for token encryption
 
 4. Run the development server:
 ```sh
@@ -64,8 +70,10 @@ Visit `http://localhost:4321` to see the app.
 | `npm install` | Install dependencies |
 | `npm run dev` | Start dev server at `localhost:4321` |
 | `npm run build` | Build production site to `./dist/` |
+| `npm run build:check` | Type check and build for production |
 | `npm run preview` | Preview production build locally |
-| `npm run astro check` | Run TypeScript type checking |
+| `npm run format` | Format code with Prettier |
+| `npm run session` | Run session updater script |
 
 ## Project Structure
 
@@ -74,26 +82,36 @@ Visit `http://localhost:4321` to see the app.
 ├── public/              # Static assets
 ├── src/
 │   ├── components/      # Reusable UI components
-│   ├── layouts/         # Page layouts
+│   │   ├── layouts/     # Layout components
+│   │   └── ui/          # UI components
 │   ├── lib/            # Utilities and helpers
-│   ├── middleware/     # Server middleware
+│   ├── middleware.ts   # Server middleware
 │   ├── pages/          # Route pages
 │   │   ├── api/        # API endpoints
+│   │   │   ├── auth/   # Authentication endpoints
+│   │   │   ├── projects/  # Project management
+│   │   │   ├── repo/   # GitHub repository integration
+│   │   │   └── updates/   # Updates management
 │   │   └── ...         # Page routes
 │   └── env.d.ts        # TypeScript declarations
+├── content/            # Keystatic content
 ├── docs/               # Documentation
+├── scripts/            # Build and utility scripts
+├── keystatic.config.ts # Keystatic CMS configuration
 └── astro.config.mjs    # Astro configuration
 ```
 
 ## Roadmap
 
 - [x] Phase 1: Authentication & Core Infrastructure
-- [ ] Phase 2: Project & Stream Management
+- [x] GitHub OAuth Integration
+- [x] Keystatic CMS Integration
+- [ ] Phase 2: Project & Update Management
 - [ ] Phase 3: Data Visualization & Analytics
 - [ ] Phase 4: Collaboration Features
 - [ ] Phase 5: Advanced Features (AI integration, templates)
 
-See [SESSION_HANDOFF.md](SESSION_HANDOFF.md) for detailed development progress.
+See `/docs` directory for detailed development documentation and session handoffs.
 
 ## Acknowledgements
 

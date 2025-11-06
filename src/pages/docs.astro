@@ -1,0 +1,169 @@
+---
+import DashboardLayout from '../components/layouts/DashboardLayout.astro';
+import { createSupabaseServer } from '../lib/supabaseServer';
+
+// Get user
+const supabase = createSupabaseServer(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
+
+if (!user) {
+  return Astro.redirect('/login');
+}
+---
+
+<DashboardLayout title="Documentation - Workspace">
+  <div class="max-w-4xl">
+    <!-- Page Header -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold text-base-content mb-2">
+        Getting Started with Workspace
+      </h1>
+      <p class="text-lg text-base-content/60">
+        Learn how to make the most of your personal research workspace
+      </p>
+    </div>
+
+    <!-- Quick Start -->
+    <div class="card bg-base-100 shadow mb-6">
+      <div class="card-body">
+        <h2 class="card-title text-2xl mb-4">Quick Start</h2>
+        <div class="space-y-4">
+          <div class="flex gap-4">
+            <div class="badge badge-primary badge-lg">1</div>
+            <div class="flex-1">
+              <h3 class="font-semibold mb-1">Create Your First Project</h3>
+              <p class="text-sm text-base-content/70">
+                Projects help you organize your research and updates into meaningful streams.
+                <a href="/projects/new" class="link link-primary ml-1">Create a project now</a>
+              </p>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="flex gap-4">
+            <div class="badge badge-primary badge-lg">2</div>
+            <div class="flex-1">
+              <h3 class="font-semibold mb-1">Share Updates</h3>
+              <p class="text-sm text-base-content/70">
+                Document your progress, learnings, and insights as you work.
+                <a href="/updates/new" class="link link-primary ml-1">Post your first update</a>
+              </p>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="flex gap-4">
+            <div class="badge badge-primary badge-lg">3</div>
+            <div class="flex-1">
+              <h3 class="font-semibold mb-1">Track Your Progress</h3>
+              <p class="text-sm text-base-content/70">
+                View your activity timeline to see how your work evolves over time.
+                <a href="/updates" class="link link-primary ml-1">View your activity log</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Concepts -->
+    <div class="card bg-base-100 shadow mb-6">
+      <div class="card-body">
+        <h2 class="card-title text-2xl mb-4">Key Concepts</h2>
+
+        <div class="space-y-6">
+          <!-- Projects -->
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-primary">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+              </svg>
+              <h3 class="text-xl font-semibold">Projects</h3>
+            </div>
+            <p class="text-base-content/70 ml-8">
+              Projects are containers for related work. They help you organize your research,
+              development, or learning into focused streams. Each project has a title, description,
+              and can contain multiple updates.
+            </p>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Updates -->
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-primary">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 class="text-xl font-semibold">Updates</h3>
+            </div>
+            <p class="text-base-content/70 ml-8">
+              Updates are your progress logs, insights, and learnings. They can be standalone
+              or linked to a project. Use updates to document what you're working on, what you've
+              learned, or challenges you're facing.
+            </p>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Activity Log -->
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-primary">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" />
+              </svg>
+              <h3 class="text-xl font-semibold">Activity Log</h3>
+            </div>
+            <p class="text-base-content/70 ml-8">
+              Your activity log shows a chronological timeline of all your work. It's a living
+              document of your progress, making it easy to review what you've accomplished and
+              identify patterns in your work.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tips & Best Practices -->
+    <div class="card bg-primary/10 border border-primary/20 mb-6">
+      <div class="card-body">
+        <h2 class="card-title text-2xl mb-4">Tips & Best Practices</h2>
+        <ul class="space-y-3">
+          <li class="flex gap-3">
+            <span class="text-primary mt-1">•</span>
+            <p><strong>Be consistent:</strong> Post updates regularly, even small ones. They add up!</p>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-primary mt-1">•</span>
+            <p><strong>Write for yourself:</strong> Your workspace is your personal research lab. Don't worry about polish.</p>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-primary mt-1">•</span>
+            <p><strong>Link updates to projects:</strong> This creates meaningful streams of work.</p>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-primary mt-1">•</span>
+            <p><strong>Use visibility controls:</strong> Start private, share when ready.</p>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-primary mt-1">•</span>
+            <p><strong>Document challenges:</strong> Blockers and problems are as valuable as successes.</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Need Help? -->
+    <div class="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info shrink-0 w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <div>
+        <h3 class="font-bold">Need Help?</h3>
+        <div class="text-sm">Have questions or feedback? We'd love to hear from you.</div>
+      </div>
+    </div>
+  </div>
+</DashboardLayout>

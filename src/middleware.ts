@@ -9,8 +9,8 @@ import { createSupabaseServer } from './lib/supabaseServer';
 
 // Routes that require authentication
 const PROTECTED_ROUTES = [
+  '/',
   '/projects',
-  '/dashboard',
   '/api/projects',
   '/api/streams',
   '/api/submissions',
@@ -41,12 +41,13 @@ export const onRequest = defineMiddleware(async ({ cookies, url, redirect, local
   }
 
   // Protect routes that require authentication
-  if (PROTECTED_ROUTES.some(route => pathname.startsWith(route))) {
-    if (!user) {
-      // Store the original URL to redirect back after login
-      const redirectTo = encodeURIComponent(pathname + url.search);
-      return redirect(`/login?redirect=${redirectTo}`, 302);
-    }
+  // Check exact match for root, or startsWith for paths with subpaths
+  const isProtected = pathname === '/' || PROTECTED_ROUTES.some(route => route !== '/' && pathname.startsWith(route));
+
+  if (isProtected && !user) {
+    // Store the original URL to redirect back after login
+    const redirectTo = encodeURIComponent(pathname + url.search);
+    return redirect(`/login?redirect=${redirectTo}`, 302);
   }
 
   // Add security headers to response

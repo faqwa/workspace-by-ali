@@ -1,0 +1,57 @@
+---
+import '../../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Workspace - Open Research Ecosystem" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body class="bg-base-100">
+    <!-- Simple Navbar -->
+    <div class="navbar bg-base-100 border-b border-base-300">
+      <div class="container mx-auto px-4">
+        <div class="flex-1">
+          <a href="/" class="btn btn-ghost text-xl font-bold">
+            Workspace
+          </a>
+        </div>
+        <div class="flex-none">
+          <a href="/login" class="btn bg-[#22c55e] hover:bg-[#16a34a] text-white border-0">
+            Sign In
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+      <slot />
+    </main>
+
+    <!-- Simple Footer -->
+    <footer class="footer footer-center p-10 bg-base-200 text-base-content mt-auto">
+      <aside>
+        <p class="font-bold">
+          Workspace by Ali
+        </p>
+        <p>Open Research Ecosystem</p>
+        <p class="text-sm opacity-70">
+          Built with Astro, Supabase, and gratitude
+        </p>
+      </aside>
+    </footer>
+  </body>
+</html>

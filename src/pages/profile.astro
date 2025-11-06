@@ -1,0 +1,91 @@
+---
+import DashboardLayout from '../components/layouts/DashboardLayout.astro';
+import { createSupabaseServer } from '../lib/supabaseServer';
+
+// Get user
+const supabase = createSupabaseServer(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
+
+if (!user) {
+  return Astro.redirect('/login');
+}
+
+const userEmail = user.email || '';
+const userName = user.user_metadata?.name || userEmail.split('@')[0];
+---
+
+<DashboardLayout title="Profile - Workspace">
+  <!-- Profile Header -->
+  <div class="card bg-base-100 shadow mb-6">
+    <div class="card-body">
+      <div class="flex items-start gap-6">
+        <!-- Avatar -->
+        <div class="avatar placeholder">
+          <div class="bg-primary text-primary-content rounded-full w-24">
+            <span class="text-3xl">{userName[0].toUpperCase()}</span>
+          </div>
+        </div>
+
+        <!-- User Info -->
+        <div class="flex-1">
+          <h1 class="text-2xl font-bold mb-2">{userName}</h1>
+          <p class="text-base-content/60 mb-4">{userEmail}</p>
+
+          <div class="flex gap-2">
+            <a href="/settings" class="btn btn-sm bg-[#22c55e] hover:bg-[#16a34a] text-white border-0">
+              Edit Profile
+            </a>
+            <button class="btn btn-ghost btn-sm">
+              Share Profile
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats shadow w-full mb-6">
+    <div class="stat">
+      <div class="stat-title">Projects</div>
+      <div class="stat-value">0</div>
+      <div class="stat-desc">Public projects</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title">Updates</div>
+      <div class="stat-value">0</div>
+      <div class="stat-desc">Published</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title">Contributions</div>
+      <div class="stat-value">0</div>
+      <div class="stat-desc">To Commons</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div role="tablist" class="tabs tabs-lifted">
+    <input type="radio" name="profile_tabs" role="tab" class="tab" aria-label="Projects" checked />
+    <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+      <div class="text-center py-12 text-base-content/60">
+        <p>No public projects yet</p>
+      </div>
+    </div>
+
+    <input type="radio" name="profile_tabs" role="tab" class="tab" aria-label="Updates" />
+    <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+      <div class="text-center py-12 text-base-content/60">
+        <p>No public updates yet</p>
+      </div>
+    </div>
+
+    <input type="radio" name="profile_tabs" role="tab" class="tab" aria-label="Activity" />
+    <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+      <div class="text-center py-12 text-base-content/60">
+        <p>No recent activity</p>
+      </div>
+    </div>
+  </div>
+</DashboardLayout>

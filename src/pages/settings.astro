@@ -1,0 +1,95 @@
+---
+import DashboardLayout from '../components/layouts/DashboardLayout.astro';
+import ThemeSettings from '../components/ui/ThemeSettings';
+import ProfileSettings from '../components/ui/ProfileSettings';
+import { createSupabaseServer } from '../lib/supabaseServer';
+
+// Get user
+const supabase = createSupabaseServer(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
+
+if (!user) {
+  return Astro.redirect('/login');
+}
+
+const userEmail = user.email || '';
+
+// Fetch user profile from users table
+const { data: userProfile } = await supabase
+  .from('users')
+  .select('full_name, bio, username, is_public')
+  .eq('id', user.id)
+  .single();
+
+const userName = userProfile?.full_name || user.user_metadata?.name || '';
+const userBio = userProfile?.bio || '';
+const username = userProfile?.username || '';
+const isPublic = userProfile?.is_public || false;
+---
+
+<DashboardLayout title="Settings - Workspace">
+  <!-- Page Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-base-content mb-2">
+      Settings
+    </h1>
+    <p class="text-base-content/60">
+      Manage your account and preferences
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Settings Navigation -->
+    <div class="lg:col-span-1">
+      <ul class="menu bg-base-100 rounded-box shadow">
+        <li class="menu-title">Account</li>
+        <li><a class="active">Profile</a></li>
+        <li><a>Security</a></li>
+        <li><a>Notifications</a></li>
+        <div class="divider my-0"></div>
+        <li class="menu-title">Workspace</li>
+        <li><a>Appearance</a></li>
+        <li><a>Preferences</a></li>
+      </ul>
+    </div>
+
+    <!-- Settings Content -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Profile Settings -->
+      <div class="card bg-base-100 shadow">
+        <div class="card-body">
+          <h2 class="card-title mb-4">Profile Settings</h2>
+          <ProfileSettings
+            client:load
+            userEmail={userEmail}
+            initialName={userName}
+            initialBio={userBio}
+            initialUsername={username}
+            initialIsPublic={isPublic}
+          />
+        </div>
+      </div>
+
+      <!-- Appearance Settings -->
+      <div class="card bg-base-100 shadow">
+        <div class="card-body">
+          <h2 class="card-title mb-4">Appearance</h2>
+          <ThemeSettings client:load />
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="card bg-error/10 border border-error/20">
+        <div class="card-body">
+          <h3 class="card-title text-error">Danger Zone</h3>
+          <p class="text-sm text-base-content/60 mb-4">
+            Irreversible actions that affect your account
+          </p>
+          <button class="btn btn-error btn-outline btn-sm">
+            Delete Account
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</DashboardLayout>

@@ -1,0 +1,136 @@
+---
+import DashboardLayout from '../../components/layouts/DashboardLayout.astro';
+import { createSupabaseServer } from '../../lib/supabaseServer';
+
+// Get user
+const supabase = createSupabaseServer(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
+
+if (!user) {
+  return Astro.redirect('/login');
+}
+---
+
+<DashboardLayout title="New Project - Workspace">
+  <!-- Page Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm breadcrumbs mb-4">
+      <ul>
+        <li><a href="/projects">Projects</a></li>
+        <li>New Project</li>
+      </ul>
+    </div>
+    <h1 class="text-3xl font-bold text-base-content">
+      Create New Project
+    </h1>
+    <p class="text-base-content/60 mt-2">
+      Start a new research project to organize your work and updates.
+    </p>
+  </div>
+
+  <!-- Project Creation Form -->
+  <div class="card bg-base-100 shadow max-w-3xl">
+    <div class="card-body">
+      <form method="POST" action="/api/projects" class="space-y-6">
+        <!-- Project Title -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Project Title</span>
+            <span class="label-text-alt text-error">Required</span>
+          </label>
+          <input
+            type="text"
+            name="name"
+            placeholder="Enter a clear, descriptive title"
+            class="input input-bordered w-full"
+            required
+          />
+          <label class="label">
+            <span class="label-text-alt">Choose a title that explains what you're working on</span>
+          </label>
+        </div>
+
+        <!-- Project Description -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Description</span>
+          </label>
+          <textarea
+            name="description"
+            placeholder="What are you researching or building? What problem are you solving?"
+            class="textarea textarea-bordered h-32"
+            rows="4"
+          ></textarea>
+          <label class="label">
+            <span class="label-text-alt">Provide context for collaborators and your future self</span>
+          </label>
+        </div>
+
+        <!-- Project Type -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Project Type</span>
+          </label>
+          <select name="category" class="select select-bordered w-full">
+            <option value="research">Research</option>
+            <option value="development">Development</option>
+            <option value="writing">Writing</option>
+            <option value="learning">Learning</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <!-- Visibility -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Visibility</span>
+          </label>
+          <div class="flex gap-4">
+            <label class="label cursor-pointer gap-2">
+              <input type="radio" name="visibility" value="private" class="radio radio-primary" checked />
+              <span class="label-text">Private</span>
+            </label>
+            <label class="label cursor-pointer gap-2">
+              <input type="radio" name="visibility" value="public" class="radio radio-primary" />
+              <span class="label-text">Public</span>
+            </label>
+          </div>
+          <label class="label">
+            <span class="label-text-alt">Private projects are only visible to you</span>
+          </label>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Form Actions -->
+        <div class="flex gap-3 justify-end">
+          <a href="/projects" class="btn btn-ghost">Cancel</a>
+          <button type="submit" class="btn bg-[#22c55e] hover:bg-[#16a34a] text-white border-0">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Create Project
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tips Card -->
+  <div class="card bg-base-200 max-w-3xl mt-6">
+    <div class="card-body">
+      <h3 class="font-semibold flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-primary">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+        </svg>
+        Tips for Projects
+      </h3>
+      <ul class="text-sm space-y-2 mt-2 text-base-content/80">
+        <li>• Use clear, descriptive titles that explain the purpose</li>
+        <li>• Add context in the description to help collaborators understand</li>
+        <li>• Start with private visibility until you're ready to share</li>
+        <li>• Projects help you organize updates into meaningful streams</li>
+      </ul>
+    </div>
+  </div>
+</DashboardLayout>

@@ -1,5 +1,5 @@
 ---
-import Layout from '../components/Layout.astro';
+import BaseLayout from '../components/layouts/BaseLayout.astro';
 
 // Middleware handles redirect if already authenticated
 const user = Astro.locals.user;
@@ -14,10 +14,9 @@ const errorMessages: Record<string, string> = {
 const errorMessage = errorParam ? errorMessages[errorParam] : null;
 ---
 
-<Layout
+<BaseLayout
   title="Sign In — Workspace by Ali"
   description="Sign in to your Workspace account"
-  user={user}
 >
   <div class="login-container">
     <div class="login-card">
@@ -77,7 +76,7 @@ const errorMessage = errorParam ? errorMessages[errorParam] : null;
       </p>
     </div>
   </div>
-</Layout>
+</BaseLayout>
 
 <script>
   // Handle magic link form submission via fetch to show success message
@@ -127,6 +126,12 @@ const errorMessage = errorParam ? errorMessages[errorParam] : null;
 </script>
 
 <style>
+  /**
+   * Login Page Styling
+   * Using Workspace Brand Design System
+   * See: docs/architecture/04_Brand_Design_System.md
+   */
+
   .login-container {
     min-height: calc(100vh - 200px);
     display: flex;
@@ -136,12 +141,13 @@ const errorMessage = errorParam ? errorMessages[errorParam] : null;
   }
 
   .login-card {
-    background: var(--elev-2);
-    border: 1px solid var(--border-2);
+    background: var(--surface-1);
+    border: 1px solid var(--border-default);
     border-radius: var(--radius-md);
     padding: 3rem;
     max-width: 440px;
     width: 100%;
+    box-shadow: var(--shadow-md);
   }
 
   .login-header {
@@ -153,13 +159,13 @@ const errorMessage = errorParam ? errorMessages[errorParam] : null;
     margin: 0 0 0.75rem;
     font-size: 1.8rem;
     font-weight: 700;
-    color: var(--text-1);
+    color: var(--text-primary);
     letter-spacing: -0.02em;
   }
 
   .subtitle {
     margin: 0;
-    color: var(--text-4);
+    color: var(--text-muted);
     font-size: 1rem;
   }
 
@@ -170,7 +176,7 @@ const errorMessage = errorParam ? errorMessages[errorParam] : null;
   .login-button {
     width: 100%;
     padding: 0.875rem 1.25rem;
-    border: 1px solid var(--border-2);
+    border: 1px solid var(--border-default);
     border-radius: var(--radius-sm);
     font-size: 1rem;
     font-weight: 500;
@@ -183,27 +189,30 @@ const errorMessage = errorParam ? errorMessages[errorParam] : null;
   }
 
   .login-button.github {
-    background: var(--text-1);
+    background: var(--text-primary);
     color: var(--bg);
-    border-color: var(--text-1);
+    border-color: var(--text-primary);
   }
 
   .login-button.github:hover {
-    background: var(--text-2);
-    border-color: var(--text-2);
+    background: var(--text-secondary);
+    border-color: var(--text-secondary);
     transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
   }
 
   .login-button.email {
-    background: var(--brand);
+    /* Commons blue for authentication (trust) */
+    background: var(--commons-primary);
     color: white;
-    border-color: var(--brand);
+    border-color: var(--commons-primary);
   }
 
   .login-button.email:hover {
-    background: var(--brand-2);
-    border-color: var(--brand-2);
+    background: #2563eb; /* Slightly darker blue */
+    border-color: #2563eb;
     transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
   }
 
   .divider {
@@ -211,7 +220,7 @@ const errorMessage = errorParam ? errorMessages[errorParam] : null;
     align-items: center;
     text-align: center;
     margin: 1.5rem 0;
-    color: var(--text-5);
+    color: var(--text-muted);
     font-size: 0.875rem;
   }
 
@@ -219,7 +228,7 @@ const errorMessage = errorParam ? errorMessages[errorParam] : null;
   .divider::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid var(--border-2);
+    border-bottom: 1px solid var(--border-default);
   }
 
   .divider span {
@@ -235,23 +244,24 @@ const errorMessage = errorParam ? errorMessages[errorParam] : null;
   .email-form label {
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--text-2);
+    color: var(--text-secondary);
   }
 
   .email-form input {
     width: 100%;
     padding: 0.75rem 1rem;
-    background: var(--elev-1);
-    border: 1px solid var(--border-2);
+    background: var(--bg);
+    border: 1px solid var(--border-default);
     border-radius: var(--radius-sm);
-    color: var(--text-1);
+    color: var(--text-primary);
     font-size: 1rem;
+    transition: all 0.2s ease;
   }
 
   .email-form input:focus {
     outline: none;
-    border-color: var(--brand);
-    box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.15);
+    border-color: var(--commons-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
   }
 
   .message {
@@ -262,32 +272,32 @@ const errorMessage = errorParam ? errorMessages[errorParam] : null;
   }
 
   .message.success {
-    background: color-mix(in oklab, var(--ok) 15%, transparent);
-    border: 1px solid color-mix(in oklab, var(--ok) 30%, transparent);
-    color: var(--ok);
+    background: color-mix(in oklab, var(--success) 15%, transparent);
+    border: 1px solid color-mix(in oklab, var(--success) 30%, transparent);
+    color: var(--success);
   }
 
   .message.error {
-    background: color-mix(in oklab, var(--err) 15%, transparent);
-    border: 1px solid color-mix(in oklab, var(--err) 30%, transparent);
-    color: var(--err);
+    background: color-mix(in oklab, var(--error) 15%, transparent);
+    border: 1px solid color-mix(in oklab, var(--error) 30%, transparent);
+    color: var(--error);
   }
 
   .note {
     text-align: center;
     font-size: 0.825rem;
-    color: var(--text-5);
+    color: var(--text-muted);
     margin: 0;
     line-height: 1.6;
   }
 
   .note a {
-    color: var(--brand);
+    color: var(--commons-primary);
     text-decoration: none;
   }
 
   .note a:hover {
-    color: var(--brand-2);
+    color: #2563eb; /* Darker blue on hover */
     text-decoration: underline;
   }
 
@@ -298,6 +308,22 @@ const errorMessage = errorParam ? errorMessages[errorParam] : null;
 
     .login-header h1 {
       font-size: 1.5rem;
+    }
+  }
+
+  /* Dark mode adjustments */
+  @media (prefers-color-scheme: dark) {
+    .login-button.github {
+      background: var(--text-primary);
+      color: var(--bg);
+    }
+
+    .login-button.github:hover {
+      background: var(--text-secondary);
+    }
+
+    .email-form input {
+      background: var(--surface-2);
     }
   }
 </style>

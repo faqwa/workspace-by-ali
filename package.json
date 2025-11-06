@@ -10,12 +10,15 @@
     "preview": "astro preview",
     "astro": "astro",
     "new:update": "node scripts/new-update.mjs",
-    "format": "prettier --write \"src/**/*.{astro,ts,tsx,js,css,md}\""
+    "format": "prettier --write \"src/**/*.{astro,ts,tsx,js,css,md}\"",
+    "session": "tsx scripts/session-updater.ts"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.1",
     "@astrojs/vercel": "^8.2.11",
     "@headlessui/react": "^2.2.9",
+    "@keystatic/astro": "^5.0.6",
+    "@keystatic/core": "^0.5.48",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.76.1",
     "@tremor/react": "^3.18.7",
@@ -23,15 +26,22 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "gray-matter": "^4.0.3",
+    "octokit": "^5.0.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tailwind-merge": "^3.3.1",
+    "yaml": "^2.8.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.5",
+    "@astrojs/tailwind": "^6.0.2",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "autoprefixer": "^10.4.21",
+    "daisyui": "^5.4.2",
+    "tailwindcss": "^3.4.18",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.5.0"
   },

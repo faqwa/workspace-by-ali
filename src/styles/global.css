@@ -1,17 +1,294 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Workspace Brand Design System
+ * Full documentation: docs/architecture/04_Brand_Design_System.md
+ *
+ * Design Principles:
+ * - 4px base spacing unit
+ * - System font stack for performance
+ * - WCAG AA color contrast minimum
+ * - Respect prefers-reduced-motion
+ */
+
 :root {
-  --bg:#0a0a0a; --elev-1:#0f0f0f; --elev-2:#131313; --elev-3:#161616;
-  --border-1:#202020; --border-2:#252525; --border-3:#353535;
-  --text-1:#fff; --text-2:#e0e0e0; --text-3:#bbb; --text-4:#888; --text-5:#666; --muted:#555;
-  --brand:#4a9eff; --brand-2:#6bb0ff; --ok:#22c55e; --warn:#f59e0b; --err:#ef4444;
-  --radius-sm:6px; --radius-md:12px; --container:1200px;
+  /* ===== SPACING (4px base unit) ===== */
+  --space-unit: 4px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ===== TYPOGRAPHY ===== */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+
+  /* ===== COLORS - Light Theme (Default) ===== */
+  /* Background layers */
+  --bg: #ffffff;
+  --surface-1: #f9fafb;
+  --surface-2: #f3f4f6;
+  --surface-3: #e5e7eb;
+  --elev-1: #f9fafb;
+  --elev-2: #ffffff;
+
+  /* Borders */
+  --border-subtle: #e5e7eb;
+  --border-default: #d1d5db;
+  --border-strong: #9ca3af;
+  --border-1: #f3f4f6;
+  --border-2: #e5e7eb;
+
+  /* Text hierarchy */
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --text-disabled: #9ca3af;
+
+  /* Brand colors - Context-aware */
+  --personal-primary: #22c55e;  /* Personal Workspace (green) 🌱 */
+  --commons-primary: #3b82f6;   /* Commons Workspace (blue) 🌳 */
+  --connection: #8b5cf6;        /* Bridge between worlds (purple) */
+
+  /* Semantic colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Safety protocol states */
+  --safety-current: #22c55e;   /* 🟢 Up to date */
+  --safety-pending: #f59e0b;   /* 🟡 Review needed */
+  --safety-required: #ef4444;  /* 🔴 Action required */
+
+  /* ===== SHADOWS & ELEVATION ===== */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* ===== RADIUS ===== */
+  --radius-sm: 6px;    /* Buttons, inputs, badges */
+  --radius-md: 12px;   /* Cards, modals */
+  --radius-lg: 16px;   /* Large cards, images */
+  --radius-full: 9999px; /* Pills, avatars */
+
+  /* ===== LAYOUT ===== */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-max: 1440px;
 }
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; background:var(--bg); color:var(--text-2);
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;
-  line-height:1.7;
+
+/* ===== DARK THEME ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Background layers */
+    --bg: #0a0a0a;
+    --surface-1: #0f0f0f;
+    --surface-2: #131313;
+    --surface-3: #161616;
+    --elev-1: #0f0f0f;
+    --elev-2: #131313;
+
+    /* Borders */
+    --border-subtle: #202020;
+    --border-default: #252525;
+    --border-strong: #353535;
+    --border-1: #131313;
+    --border-2: #202020;
+
+    /* Text hierarchy */
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-muted: #888888;
+    --text-disabled: #555555;
+
+    /* Shadows adjusted for dark backgrounds */
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  }
 }
-img{max-width:100%;height:auto;display:block}
-.container{max-width:var(--container);margin:0 auto;padding:0 3rem}
-@media (max-width:768px){ .container{padding:0 1.5rem} }
+
+/* ===== BASE STYLES ===== */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== TYPOGRAPHY DEFAULTS ===== */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+p {
+  margin-bottom: 1em;
+}
+
+code, pre {
+  font-family: var(--font-mono);
+}
+
+/* ===== IMAGES ===== */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ===== LAYOUT CONTAINERS ===== */
+.container {
+  max-width: var(--container-lg);
+  margin: 0 auto;
+  padding: 0 var(--space-12);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--space-6);
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+:focus-visible {
+  outline: 3px solid var(--commons-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Skip to main content link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--commons-primary);
+  color: white;
+  padding: var(--space-2) var(--space-4);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: var(--space-2);
+}
+
+/* ===== UTILITY CLASSES ===== */
+.text-balance {
+  text-wrap: balance;
+}
+
+.transition-smooth {
+  transition: all 0.2s ease-out;
+}
+
+/* Context-aware brand colors */
+.personal-context {
+  --primary: var(--personal-primary);
+}
+
+.commons-context {
+  --primary: var(--commons-primary);
+}
+
+/* ===== BRAND COLOR UTILITIES ===== */
+/* Personal Workspace (Green) 🌱 */
+.bg-personal-primary {
+  background-color: var(--personal-primary);
+}
+
+.bg-personal-primary-hover:hover {
+  background-color: #16a34a; /* green-600 for hover */
+}
+
+.text-personal-primary {
+  color: var(--personal-primary);
+}
+
+.border-personal-primary {
+  border-color: var(--personal-primary);
+}
+
+/* Commons Workspace (Blue) 🌳 */
+.bg-commons-primary {
+  background-color: var(--commons-primary);
+}
+
+.bg-commons-primary-hover:hover {
+  background-color: #2563eb; /* blue-600 for hover */
+}
+
+.text-commons-primary {
+  color: var(--commons-primary);
+}
+
+.border-commons-primary {
+  border-color: var(--commons-primary);
+}
+
+/* Button Component Styles */
+.btn-personal-primary {
+  background-color: var(--personal-primary);
+  color: white;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1.5rem;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-personal-primary:hover {
+  background-color: #16a34a; /* green-600 */
+  transform: translateY(-1px);
+}
+
+.btn-commons-primary {
+  background-color: var(--commons-primary);
+  color: white;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1.5rem;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-commons-primary:hover {
+  background-color: #2563eb; /* blue-600 */
+  transform: translateY(-1px);
+}

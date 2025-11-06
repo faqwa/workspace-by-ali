@@ -27,10 +27,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       return apiError('Invalid provider', 400, 'INVALID_PROVIDER');
     }
 
-    const redirectUrl =
-      import.meta.env.DEV
-        ? 'http://localhost:4321/api/auth/callback'
-        : `${new URL(request.url).origin}/api/auth/callback`;
+    const redirectUrl = `${new URL(request.url).origin}/api/auth/callback`;
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: provider as 'github' | 'google',
@@ -58,9 +55,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: import.meta.env.DEV
-          ? 'http://localhost:4321/api/auth/callback'
-          : `${new URL(request.url).origin}/api/auth/callback`,
+        emailRedirectTo: `${new URL(request.url).origin}/api/auth/callback`,
       },
     });
 

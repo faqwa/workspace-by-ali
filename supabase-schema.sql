@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
   username TEXT UNIQUE,
   bio TEXT,
   avatar_url TEXT,
+  is_public BOOLEAN DEFAULT FALSE,
   role TEXT CHECK (role IN ('user', 'reviewer', 'admin')) DEFAULT 'user',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   last_signin TIMESTAMP WITH TIME ZONE
@@ -78,6 +79,18 @@ CREATE TABLE IF NOT EXISTS visualizations (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Activities table (for Phase 1 - activity tracking/updates)
+CREATE TABLE IF NOT EXISTS activities (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  title TEXT NOT NULL,
+  content TEXT,
+  type TEXT CHECK (type IN ('project', 'update', 'stream')) NOT NULL,
+  project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+  metadata JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- ============================================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================================================
@@ -89,6 +102,7 @@ ALTER TABLE streams ENABLE ROW LEVEL SECURITY;
 ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE safety_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE visualizations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE activities ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================================
 -- USERS TABLE POLICIES
@@ -287,6 +301,34 @@ CREATE POLICY "Users can manage own visualizations"
   );
 
 -- ============================================================================
+-- ACTIVITIES TABLE POLICIES
+-- ============================================================================
+
+-- Users can view their own activities
+CREATE POLICY "Users can view own activities"
+  ON activities
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- Users can create activities
+CREATE POLICY "Users can create activities"
+  ON activities
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Users can update their own activities
+CREATE POLICY "Users can update own activities"
+  ON activities
+  FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- Users can delete their own activities
+CREATE POLICY "Users can delete own activities"
+  ON activities
+  FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- ============================================================================
 -- FUNCTIONS & TRIGGERS
 -- ============================================================================
 
@@ -323,6 +365,12 @@ CREATE INDEX IF NOT EXISTS idx_streams_project ON streams(project_id);
 -- Index on safety logs
 CREATE INDEX IF NOT EXISTS idx_safety_logs_user ON safety_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_safety_logs_stream ON safety_logs(stream_id);
+
+-- Index on activities
+CREATE INDEX IF NOT EXISTS idx_activities_user ON activities(user_id);
+CREATE INDEX IF NOT EXISTS idx_activities_project ON activities(project_id);
+CREATE INDEX IF NOT EXISTS idx_activities_type ON activities(type);
+CREATE INDEX IF NOT EXISTS idx_activities_created ON activities(created_at DESC);
 
 -- ============================================================================
 -- STORAGE BUCKETS

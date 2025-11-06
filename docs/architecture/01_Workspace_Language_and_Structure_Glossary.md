@@ -25,7 +25,7 @@
 
 **Example Domains:**
 - `arcup.xbyali.page`
-- `commons.xbyali.page`
+- `remotesensing.xbyali.page`
 
 ---
 
@@ -46,8 +46,10 @@
 - `workspace-dr_singh/`
 
 **Example Domains:**
-- `workspace.xbyali.page/ali`
-- `workspace.xbyali.page/leila`
+- `workspace.xbyali.page/`
+- `workspace.leila.com/`
+- `workspace.doctorsingh.com/`
+
 
 ---
 

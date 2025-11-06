@@ -1,89 +1,129 @@
 ---
-import Layout from '../components/Layout.astro';
-import CategorySection from '../components/CategorySection.astro';
-import { getCollection } from 'astro:content';
+import DashboardLayout from '../components/layouts/DashboardLayout.astro';
+import ActivityLog from '../components/ui/ActivityLog';
+import EmptyState from '../components/ui/EmptyState';
+import { createSupabaseServer } from '../lib/supabaseServer';
 
-// Get user from middleware (if authenticated)
-const user = Astro.locals.user;
+// Get user
+const supabase = createSupabaseServer(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
 
-// Get all updates and sort by date (newest first)
-const allUpdates = await getCollection('updates');
-const sortedUpdates = allUpdates.sort((a, b) =>
-  b.data.date.getTime() - a.data.date.getTime()
-);
+if (!user) {
+  return Astro.redirect('/login');
+}
 
-const plasmaHardware = sortedUpdates.filter(u => u.data.category === 'plasma-hardware');
-const saltwaterDynamics = sortedUpdates.filter(u => u.data.category === 'saltwater-dynamics');
-const reactiveSpecies = sortedUpdates.filter(u => u.data.category === 'reactive-species');
+// Fetch real activity data from database
+const { data: allActivities, error: activitiesError } = await supabase
+  .from('activities')
+  .select('*, projects(name)')
+  .eq('user_id', user.id)
+  .order('created_at', { ascending: false })
+  .limit(100);
 
-const latestUpdate = sortedUpdates[0]?.data.date;
-const formattedDate = latestUpdate?.toLocaleDateString('en-AU', { year:'numeric', month:'long', day:'numeric' });
+if (activitiesError) {
+  console.error('Error fetching activities:', activitiesError);
+}
+
+// Filter logic
+const filter = Astro.url.searchParams.get('filter') || 'all';
+const filteredDbActivities = filter === 'all'
+  ? (allActivities || [])
+  : (allActivities || []).filter(a => a.type === filter);
+
+// Transform activities for ActivityLog component
+const filteredActivities = filteredDbActivities.map((activity) => ({
+  id: activity.id,
+  title: activity.title,
+  description: activity.content?.substring(0, 200),
+  timestamp: new Date(activity.created_at),
+  type: activity.type || 'update',
+}));
 ---
 
-<Layout title="Workspace by Ali" user={user}>
-  <div class="container">
-    <header class="hero" role="banner">
-      <h1>What I'm Currently Working On</h1>
-      <p class="subtitle">
-        Live updates from active ArcUp plasma research — experiments, failures, iteration, and progress.
+<DashboardLayout title="Updates - Workspace">
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-base-content mb-2">
+        Activity Log
+      </h1>
+      <p class="text-base-content/60">
+        Track all your workspace activity and updates
       </p>
-      {latestUpdate && <p class="last-updated">Last updated <time datetime={latestUpdate.toISOString()}>{formattedDate}</time></p>}
-    </header>
+    </div>
 
-    <div class="categories" role="region" aria-label="Update categories">
-      {plasmaHardware.length > 0 && (
-        <CategorySection
-          title="Plasma Hardware & Design"
-          description="Circuit design, CAD models, assembly, and hardware iteration."
-          updates={plasmaHardware}
-          category="plasma-hardware"
-        />
-      )}
+    <!-- Filter Buttons -->
+    <div class="join">
+      <a href="/updates" class={`join-item btn btn-sm ${filter === 'all' ? 'btn-active' : ''}`}>
+        All
+      </a>
+      <a href="/updates?filter=project" class={`join-item btn btn-sm ${filter === 'project' ? 'btn-active' : ''}`}>
+        Projects
+      </a>
+      <a href="/updates?filter=update" class={`join-item btn btn-sm ${filter === 'update' ? 'btn-active' : ''}`}>
+        Updates
+      </a>
+      <a href="/updates?filter=stream" class={`join-item btn btn-sm ${filter === 'stream' ? 'btn-active' : ''}`}>
+        Streams
+      </a>
+    </div>
+  </div>
 
-      {saltwaterDynamics.length > 0 && (
-        <CategorySection
-          title="Saltwater & Plasma Dynamics"
-          description="Molecular interactions, physics modelling, and theoretical work."
-          updates={saltwaterDynamics}
-          category="saltwater-dynamics"
-        />
-      )}
+  <!-- Stats Summary -->
+  <div class="stats shadow mb-8 w-full">
+    <div class="stat">
+      <div class="stat-title">Total Activities</div>
+      <div class="stat-value text-primary">{filteredActivities.length}</div>
+      <div class="stat-desc">All time</div>
+    </div>
 
-      {reactiveSpecies.length > 0 && (
-        <CategorySection
-          title="Reactive Species in Saltwater"
-          description="Experimental data, reactions, measurements, and observations."
-          updates={reactiveSpecies}
-          category="reactive-species"
+    <div class="stat">
+      <div class="stat-title">This Week</div>
+      <div class="stat-value text-secondary">
+        {filteredActivities.filter(a =>
+          a.timestamp.getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000
+        ).length}
+      </div>
+      <div class="stat-desc">Last 7 days</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title">This Month</div>
+      <div class="stat-value text-accent">
+        {filteredActivities.filter(a =>
+          a.timestamp.getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000
+        ).length}
+      </div>
+      <div class="stat-desc">Last 30 days</div>
+    </div>
+  </div>
+
+  <!-- Activity Timeline -->
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      {filteredActivities.length > 0 ? (
+        <ActivityLog client:load activities={filteredActivities} limit={0} showViewAll={false} />
+      ) : (
+        <EmptyState
+          client:load
+          title="No activities yet"
+          description="Start creating projects and updates to see them here."
+          action={{
+            label: "Create Your First Project",
+            href: "/projects/new"
+          }}
         />
       )}
     </div>
-
-    {sortedUpdates.length === 0 && (
-      <div class="empty-state" role="status" aria-live="polite">
-        <p>No updates yet. The work begins soon.</p>
-      </div>
-    )}
   </div>
-</Layout>
 
-<style>
-  .hero{
-    text-align:center; margin-bottom:5rem; padding:2.5rem 0 3.5rem;
-  }
-  h1{
-    font-size:2.6rem; font-weight:700; margin:0 0 1rem; color:var(--text-1);
-    letter-spacing:-.03em; line-height:1.2;
-  }
-  .subtitle{
-    font-size:1.08rem; color:var(--text-4); max-width:700px; margin:0 auto 1.25rem; line-height:1.7;
-  }
-  .last-updated{ color:var(--muted); font-size:.9rem; margin:0; }
-  .categories{ margin-top:3rem; }
-  .empty-state{ text-align:center; padding:5rem 2rem; color:var(--muted); font-size:1.05rem; }
-
-  @media (max-width: 768px){
-    h1{ font-size:2rem; }
-    .subtitle{ font-size:1rem; }
-  }
-</style>
+  <!-- Export/Download Section (Future feature) -->
+  <div class="flex justify-end mt-6">
+    <button class="btn btn-ghost btn-sm" disabled>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+      </svg>
+      Export Activity Log
+    </button>
+  </div>
+</DashboardLayout>

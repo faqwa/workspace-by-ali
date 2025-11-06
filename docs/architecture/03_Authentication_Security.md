@@ -162,8 +162,8 @@ Original middleware used `getSession()` which caused the avatar not to appear be
 - Adds security headers to responses
 
 **Protected Routes:**
+- `/` (dashboard home)
 - `/projects/*`
-- `/dashboard/*`
 - `/api/projects/*`
 - `/api/streams/*`
 - `/api/submissions/*`
