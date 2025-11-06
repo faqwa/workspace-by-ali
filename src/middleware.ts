@@ -19,10 +19,12 @@ const PROTECTED_ROUTES = [
 
 // Routes that require OWNER role (readers cannot access)
 const OWNER_ONLY_ROUTES = [
+  '/setup',
   '/settings',
   '/keystatic',
   '/api/repo',
   '/api/publish',
+  '/api/workspace',
 ];
 
 // Routes that should redirect to /projects if already authenticated
