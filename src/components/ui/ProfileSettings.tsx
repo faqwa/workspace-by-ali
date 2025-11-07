@@ -117,12 +117,13 @@ export default function ProfileSettings({
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Success Message */}
       {successMessage && (
-        <div className="alert alert-success">
+        <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-800 dark:text-green-200">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="stroke-current shrink-0 h-6 w-6"
+            className="shrink-0 h-5 w-5"
             fill="none"
             viewBox="0 0 24 24"
+            stroke="currentColor"
           >
             <path
               strokeLinecap="round"
@@ -131,18 +132,19 @@ export default function ProfileSettings({
               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <span>{successMessage}</span>
+          <span className="text-sm font-medium">{successMessage}</span>
         </div>
       )}
 
       {/* Error Message */}
       {errorMessage && (
-        <div className="alert alert-error">
+        <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-200">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="stroke-current shrink-0 h-6 w-6"
+            className="shrink-0 h-5 w-5"
             fill="none"
             viewBox="0 0 24 24"
+            stroke="currentColor"
           >
             <path
               strokeLinecap="round"
@@ -151,104 +153,121 @@ export default function ProfileSettings({
               d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <span>{errorMessage}</span>
+          <span className="text-sm font-medium">{errorMessage}</span>
         </div>
       )}
 
       {/* Email (Read-only) */}
       <div className="form-control">
-        <label className="label">
-          <span className="label-text">Email</span>
+        <label className="form-label">
+          Email
         </label>
         <input
           type="email"
           value={userEmail}
-          className="input input-bordered"
+          className="form-input opacity-60 cursor-not-allowed"
           disabled
         />
-        <label className="label">
-          <span className="label-text-alt">Your email address cannot be changed</span>
-        </label>
+        <div className="form-hint mt-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Your email address cannot be changed</span>
+        </div>
       </div>
 
       {/* Display Name */}
       <div className="form-control">
-        <label className="label">
-          <span className="label-text">Display Name</span>
+        <label className="form-label">
+          Display Name
+          <span className="form-label-optional">(optional)</span>
         </label>
         <input
           type="text"
           placeholder="Enter your name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          className={`input input-bordered ${errors.fullName ? 'input-error' : ''}`}
+          className={`form-input ${errors.fullName ? 'error' : ''}`}
           maxLength={100}
         />
         {errors.fullName && (
-          <label className="label">
-            <span className="label-text-alt text-error">{errors.fullName}</span>
-          </label>
+          <div className="error-message mt-2">
+            <svg className="error-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{errors.fullName}</span>
+          </div>
         )}
       </div>
 
       {/* Username */}
       <div className="form-control">
-        <label className="label">
-          <span className="label-text">Username</span>
+        <label className="form-label">
+          Username
+          <span className="form-label-optional">(optional)</span>
         </label>
         <input
           type="text"
           placeholder="Enter a unique username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className={`input input-bordered ${errors.username ? 'input-error' : ''}`}
+          className={`form-input ${errors.username ? 'error' : ''}`}
           maxLength={30}
         />
         {errors.username && (
-          <label className="label">
-            <span className="label-text-alt text-error">{errors.username}</span>
-          </label>
+          <div className="error-message mt-2">
+            <svg className="error-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{errors.username}</span>
+          </div>
         )}
       </div>
 
       {/* Bio */}
       <div className="form-control">
-        <label className="label">
-          <span className="label-text">Bio</span>
-          <span className="label-text-alt">{bio.length}/500</span>
-        </label>
+        <div className="flex justify-between items-center mb-2">
+          <label className="form-label mb-0">
+            Bio
+            <span className="form-label-optional">(optional)</span>
+          </label>
+          <span className="text-sm text-gray-500 dark:text-gray-400">{bio.length}/500</span>
+        </div>
         <textarea
-          className={`textarea textarea-bordered h-24 ${errors.bio ? 'textarea-error' : ''}`}
+          className={`form-textarea h-24 ${errors.bio ? 'error' : ''}`}
           placeholder="Tell us about yourself"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           maxLength={500}
         />
         {errors.bio && (
-          <label className="label">
-            <span className="label-text-alt text-error">{errors.bio}</span>
-          </label>
+          <div className="error-message mt-2">
+            <svg className="error-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{errors.bio}</span>
+          </div>
         )}
       </div>
 
       {/* Profile Visibility */}
       <div className="form-control">
-        <label className="label cursor-pointer">
-          <span className="label-text">Public Profile</span>
+        <label className="flex items-center justify-between cursor-pointer p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary transition-colors">
+          <div>
+            <div className="form-label mb-1">Public Profile</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Allow others to view your profile</div>
+          </div>
           <input
             type="checkbox"
-            className="toggle toggle-primary"
+            className="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-2 focus:ring-primary/20"
             checked={isPublic}
             onChange={(e) => setIsPublic(e.target.checked)}
           />
         </label>
-        <label className="label">
-          <span className="label-text-alt">Allow others to view your profile</span>
-        </label>
       </div>
 
       {/* Actions */}
-      <div className="card-actions justify-end mt-6">
+      <div className="form-actions mt-6">
         <Button
           type="button"
           variant="ghost"

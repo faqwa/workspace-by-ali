@@ -1,0 +1,109 @@
+---
+/**
+ * FormInput Component - Design System
+ *
+ * Text input with label, helper text, error states, and character counter
+ * Based on /design folder HTML prototypes
+ */
+
+interface Props {
+  id?: string;
+  name: string;
+  label?: string;
+  type?: 'text' | 'email' | 'password' | 'url' | 'tel' | 'number';
+  placeholder?: string;
+  value?: string;
+  required?: boolean;
+  disabled?: boolean;
+  error?: string;
+  hint?: string;
+  maxLength?: number;
+  showCount?: boolean;
+  class?: string;
+}
+
+const {
+  id,
+  name,
+  label,
+  type = 'text',
+  placeholder,
+  value,
+  required = false,
+  disabled = false,
+  error,
+  hint,
+  maxLength,
+  showCount = false,
+  class: className = '',
+} = Astro.props;
+
+const inputId = id || name;
+const hasError = Boolean(error);
+---
+
+<div class="form-control">
+  {label && (
+    <label for={inputId} class="form-label">
+      {label}
+      {required && <span class="text-error ml-1">*</span>}
+      {!required && <span class="form-label-optional">(optional)</span>}
+    </label>
+  )}
+
+  <input
+    id={inputId}
+    name={name}
+    type={type}
+    class:list={[
+      'form-input',
+      hasError && 'error',
+      className,
+    ]}
+    placeholder={placeholder}
+    value={value}
+    required={required}
+    disabled={disabled}
+    maxlength={maxLength}
+    {...Astro.props}
+  />
+
+  {hint && !hasError && (
+    <div class="form-hint">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{hint}</span>
+    </div>
+  )}
+
+  {hasError && (
+    <div class="error-message">
+      <svg class="error-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{error}</span>
+    </div>
+  )}
+
+  {showCount && maxLength && (
+    <div class="char-count" id={`${inputId}-count`}>
+      {value?.length || 0} / {maxLength}
+    </div>
+  )}
+</div>
+
+<script>
+  // Character counter functionality
+  document.querySelectorAll('[maxlength]').forEach((input) => {
+    const countEl = document.getElementById(`${input.id}-count`);
+    if (countEl) {
+      input.addEventListener('input', (e) => {
+        const target = e.target as HTMLInputElement;
+        const max = target.maxLength;
+        const current = target.value.length;
+        countEl.textContent = `${current} / ${max}`;
+      });
+    }
+  });
+</script>

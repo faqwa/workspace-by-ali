@@ -1,8 +1,11 @@
 ---
 import DashboardLayout from '../components/layouts/DashboardLayout.astro';
-import ActivityLog from '../components/ui/ActivityLog';
-import EmptyState from '../components/ui/EmptyState';
+import Timeline from '../components/ui/redesign/Timeline.astro';
+import TimelineItem from '../components/ui/redesign/TimelineItem.astro';
 import { createSupabaseServer } from '../lib/supabaseServer';
+import { formatDistanceToNow } from 'date-fns';
+import { createReader } from '@keystatic/core/reader';
+import keystaticConfig from '../../keystatic.config';
 
 // Get user
 const supabase = createSupabaseServer(Astro.cookies);
@@ -12,118 +15,302 @@ if (!user) {
   return Astro.redirect('/login');
 }
 
-// Fetch real activity data from database
-const { data: allActivities, error: activitiesError } = await supabase
-  .from('activities')
-  .select('*, projects(name)')
-  .eq('user_id', user.id)
-  .order('created_at', { ascending: false })
-  .limit(100);
+// Read updates from Keystatic (Git-based content)
+const reader = createReader(process.cwd(), keystaticConfig);
+const updateSlugs = await reader.collections.updates.list();
 
-if (activitiesError) {
-  console.error('Error fetching activities:', activitiesError);
-}
+// Read all updates with their content
+const allUpdates = await Promise.all(
+  updateSlugs.map(async (slug) => {
+    const update = await reader.collections.updates.read(slug);
+    return {
+      slug,
+      ...update,
+    };
+  })
+);
 
-// Filter logic
+// Sort by date (most recent first)
+const sortedUpdates = allUpdates.sort((a, b) => {
+  const dateA = new Date(a.date || 0).getTime();
+  const dateB = new Date(b.date || 0).getTime();
+  return dateB - dateA;
+});
+
+// Filter logic based on type
 const filter = Astro.url.searchParams.get('filter') || 'all';
-const filteredDbActivities = filter === 'all'
-  ? (allActivities || [])
-  : (allActivities || []).filter(a => a.type === filter);
+const filteredUpdates = filter === 'all'
+  ? sortedUpdates
+  : sortedUpdates.filter(u => u.type === filter);
 
-// Transform activities for ActivityLog component
-const filteredActivities = filteredDbActivities.map((activity) => ({
-  id: activity.id,
-  title: activity.title,
-  description: activity.content?.substring(0, 200),
-  timestamp: new Date(activity.created_at),
-  type: activity.type || 'update',
-}));
+// Calculate stats
+const totalUpdates = sortedUpdates.length;
+const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+const thisWeek = sortedUpdates.filter(u => new Date(u.date || 0).getTime() > weekAgo).length;
+const thisMonth = sortedUpdates.filter(u => new Date(u.date || 0).getTime() > monthAgo).length;
+
+// Format timestamp helper
+const formatTimestamp = (dateStr: string | null) => {
+  try {
+    if (!dateStr) return 'Recently';
+    return formatDistanceToNow(new Date(dateStr), { addSuffix: true });
+  } catch {
+    return 'Recently';
+  }
+};
+
+// Get type label
+const getTypeLabel = (type: string | null) => {
+  if (type === 'experiment') return 'Experiment';
+  if (type === 'observation') return 'Observation';
+  if (type === 'milestone') return 'Milestone';
+  if (type === 'note') return 'Note';
+  return 'Update';
+};
+
+// Convert document content to plain text preview
+const getContentPreview = (content: any) => {
+  if (!content) return 'No content';
+
+  try {
+    // Keystatic documents are arrays of elements
+    // Try to extract plain text from the first few elements
+    let text = '';
+    const maxLength = 150;
+
+    const extractText = (node: any): string => {
+      if (!node) return '';
+
+      // Handle text nodes
+      if (typeof node === 'string') return node;
+      if (node.text) return node.text;
+
+      // Handle arrays (document structure)
+      if (Array.isArray(node)) {
+        return node.map(extractText).join(' ');
+      }
+
+      // Handle objects with children
+      if (node.children) {
+        return extractText(node.children);
+      }
+
+      return '';
+    };
+
+    text = extractText(content).trim();
+
+    if (!text) return 'Click to read update...';
+
+    // Truncate to maxLength
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + '...';
+    }
+
+    return text;
+  } catch (error) {
+    console.error('Error extracting content preview:', error);
+    return 'Click to read update...';
+  }
+};
 ---
 
 <DashboardLayout title="Updates - Workspace">
   <!-- Page Header -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+  <div class="flex justify-between items-start mb-8">
     <div>
-      <h1 class="text-3xl font-bold text-base-content mb-2">
-        Activity Log
+      <h1 class="text-[32px] font-bold text-gray-900 dark:text-gray-100 mb-1.5">
+        Updates
       </h1>
-      <p class="text-base-content/60">
-        Track all your workspace activity and updates
+      <p class="text-[15px] text-gray-500 dark:text-gray-400">
+        Track your research updates and progress
       </p>
     </div>
-
-    <!-- Filter Buttons -->
-    <div class="join">
-      <a href="/updates" class={`join-item btn btn-sm ${filter === 'all' ? 'btn-active' : ''}`}>
-        All
-      </a>
-      <a href="/updates?filter=project" class={`join-item btn btn-sm ${filter === 'project' ? 'btn-active' : ''}`}>
-        Projects
-      </a>
-      <a href="/updates?filter=update" class={`join-item btn btn-sm ${filter === 'update' ? 'btn-active' : ''}`}>
-        Updates
-      </a>
-      <a href="/updates?filter=subproject" class={`join-item btn btn-sm ${filter === 'subproject' ? 'btn-active' : ''}`}>
-        Sub-Projects
+    <div class="flex gap-3">
+      <button class="btn btn-secondary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        Export
+      </button>
+      <a href="/updates/new" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        New Update
       </a>
     </div>
   </div>
 
-  <!-- Stats Summary -->
-  <div class="stats shadow mb-8 w-full">
-    <div class="stat">
-      <div class="stat-title">Total Activities</div>
-      <div class="stat-value text-primary">{filteredActivities.length}</div>
-      <div class="stat-desc">All time</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-title">This Week</div>
-      <div class="stat-value text-secondary">
-        {filteredActivities.filter(a =>
-          a.timestamp.getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000
-        ).length}
+  <!-- Stats Row -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+    <!-- Total Updates -->
+    <div class="stat-card">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-[10px] bg-indigo-50 dark:bg-indigo-950 text-indigo-500 flex items-center justify-center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
       </div>
-      <div class="stat-desc">Last 7 days</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-title">This Month</div>
-      <div class="stat-value text-accent">
-        {filteredActivities.filter(a =>
-          a.timestamp.getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000
-        ).length}
+      <div class="text-5xl font-bold text-gray-900 dark:text-gray-100 leading-none mb-2">
+        {totalUpdates}
       </div>
-      <div class="stat-desc">Last 30 days</div>
+      <div class="text-[13px] text-gray-500 dark:text-gray-400 font-medium">
+        Total Updates
+      </div>
+      <div class="text-[13px] text-gray-500 dark:text-gray-400">
+        All time
+      </div>
+    </div>
+
+    <!-- This Week -->
+    <div class="stat-card">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-[10px] bg-amber-50 dark:bg-amber-950 text-amber-500 flex items-center justify-center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </div>
+      </div>
+      <div class="text-5xl font-bold text-gray-900 dark:text-gray-100 leading-none mb-2">
+        {thisWeek}
+      </div>
+      <div class="text-[13px] text-gray-500 dark:text-gray-400 font-medium">
+        This Week
+      </div>
+      <div class="text-[13px] text-gray-500 dark:text-gray-400">
+        Last 7 days
+      </div>
+    </div>
+
+    <!-- This Month -->
+    <div class="stat-card">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-[10px] bg-blue-50 dark:bg-blue-950 text-blue-500 flex items-center justify-center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+      </div>
+      <div class="text-5xl font-bold text-gray-900 dark:text-gray-100 leading-none mb-2">
+        {thisMonth}
+      </div>
+      <div class="text-[13px] text-gray-500 dark:text-gray-400 font-medium">
+        This Month
+      </div>
+      <div class="text-[13px] text-gray-500 dark:text-gray-400">
+        Last 30 days
+      </div>
     </div>
   </div>
 
-  <!-- Activity Timeline -->
-  <div class="card bg-base-100 shadow">
-    <div class="card-body">
-      {filteredActivities.length > 0 ? (
-        <ActivityLog client:load activities={filteredActivities} limit={0} showViewAll={false} />
-      ) : (
-        <EmptyState
-          client:load
-          title="No activities yet"
-          description="Start creating projects and updates to see them here."
-          action={{
-            label: "Create Your First Project",
-            href: "/projects/new"
-          }}
-        />
-      )}
-    </div>
+  <!-- Tabs -->
+  <div class="inline-flex bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-2 gap-1 mb-6">
+    <a
+      href="/updates"
+      class={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${filter === 'all' ? 'text-primary-dark dark:text-primary bg-primary-light dark:bg-primary-dark' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+    >
+      All
+    </a>
+    <a
+      href="/updates?filter=experiment"
+      class={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${filter === 'experiment' ? 'text-primary-dark dark:text-primary bg-primary-light dark:bg-primary-dark' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+    >
+      Experiments
+    </a>
+    <a
+      href="/updates?filter=observation"
+      class={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${filter === 'observation' ? 'text-primary-dark dark:text-primary bg-primary-light dark:bg-primary-dark' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+    >
+      Observations
+    </a>
+    <a
+      href="/updates?filter=milestone"
+      class={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${filter === 'milestone' ? 'text-primary-dark dark:text-primary bg-primary-light dark:bg-primary-dark' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+    >
+      Milestones
+    </a>
+    <a
+      href="/updates?filter=note"
+      class={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${filter === 'note' ? 'text-primary-dark dark:text-primary bg-primary-light dark:bg-primary-dark' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+    >
+      Notes
+    </a>
   </div>
 
-  <!-- Export/Download Section (Future feature) -->
-  <div class="flex justify-end mt-6">
-    <button class="btn btn-ghost btn-sm" disabled>
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+  <!-- Controls (Search + Filters) -->
+  <div class="flex gap-3 mb-6">
+    <div class="flex-1 relative">
+      <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="M21 21l-4.35-4.35"/>
       </svg>
-      Export Activity Log
+      <input
+        type="text"
+        class="search-input w-full pl-11"
+        placeholder="Search updates..."
+      />
+    </div>
+    <button class="filter-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      Date Range
     </button>
+    <button class="filter-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+      </svg>
+      Filter
+    </button>
+  </div>
+
+  <!-- Timeline Container -->
+  <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-8">
+    {filteredUpdates.length > 0 ? (
+      <Timeline>
+        {filteredUpdates.map((update) => (
+          <TimelineItem
+            type="update"
+            title={update.title}
+            meta={update.projectSlug || 'No project'}
+            timestamp={formatTimestamp(update.date)}
+            description={getContentPreview(update.content)}
+            tag={getTypeLabel(update.type)}
+          />
+        ))}
+      </Timeline>
+    ) : (
+      <div class="text-center py-20">
+        <div class="w-20 h-20 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 dark:text-gray-500">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          No updates yet
+        </h2>
+        <p class="text-[15px] text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+          Create your first update via Keystatic CMS to see it here.
+        </p>
+        <a href="/keystatic#/collection/updates" class="btn btn-primary mx-auto">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Create Your First Update
+        </a>
+      </div>
+    )}
   </div>
 </DashboardLayout>

@@ -41,10 +41,10 @@ const repoUrl = userRepo?.repo_url || null;
 <DashboardLayout title="Settings - Workspace">
   <!-- Page Header -->
   <div class="mb-8">
-    <h1 class="text-3xl font-bold text-base-content mb-2">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
       Settings
     </h1>
-    <p class="text-base-content/60">
+    <p class="text-gray-600 dark:text-gray-400">
       Manage your account and preferences
     </p>
   </div>
@@ -52,69 +52,68 @@ const repoUrl = userRepo?.repo_url || null;
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Settings Navigation -->
     <div class="lg:col-span-1">
-      <ul class="menu bg-base-100 rounded-box shadow">
-        <li class="menu-title">Account</li>
-        <li><a class="active">Profile</a></li>
-        <li><a>Security</a></li>
-        <li><a>Notifications</a></li>
-        <div class="divider my-0"></div>
-        <li class="menu-title">Workspace</li>
-        <li><a>GitHub Integration</a></li>
-        <li><a>Appearance</a></li>
-        <li><a>Preferences</a></li>
-      </ul>
+      <nav class="content-section space-y-1">
+        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Account</div>
+        <a href="#profile" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-primary/10 text-primary">Profile</a>
+        <a href="#security" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Security</a>
+        <a href="#notifications" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Notifications</a>
+
+        <div class="border-t border-gray-200 dark:border-gray-700 my-4"></div>
+
+        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Workspace</div>
+        <a href="#github" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">GitHub Integration</a>
+        <a href="#appearance" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Appearance</a>
+        <a href="#preferences" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Preferences</a>
+      </nav>
     </div>
 
     <!-- Settings Content -->
     <div class="lg:col-span-2 space-y-6">
       <!-- Profile Settings -->
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <h2 class="card-title mb-4">Profile Settings</h2>
-          <ProfileSettings
-            client:load
-            userEmail={userEmail}
-            initialName={userName}
-            initialBio={userBio}
-            initialUsername={username}
-            initialIsPublic={isPublic}
-          />
-        </div>
+      <div class="content-section">
+        <h2 class="section-title mb-6">Profile Settings</h2>
+        <ProfileSettings
+          client:load
+          userEmail={userEmail}
+          initialName={userName}
+          initialBio={userBio}
+          initialUsername={username}
+          initialIsPublic={isPublic}
+        />
       </div>
 
       <!-- GitHub Integration -->
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <h2 class="card-title mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-            </svg>
-            GitHub Integration
-          </h2>
-          <p class="text-sm text-base-content/60 mb-4">
-            Connect your GitHub account to enable Git-backed content storage and version control.
-          </p>
+      <div class="content-section">
+        <div class="section-header">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-primary">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+          </svg>
+          <h2 class="section-title">GitHub Integration</h2>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+          Connect your GitHub account to enable Git-backed content storage and version control.
+        </p>
 
           <!-- Connection Status -->
           <div class="space-y-4">
-            <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
+            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
               <div class="flex items-center gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-6 h-6 text-gray-700 dark:text-gray-300">
                   <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                 </svg>
                 <div>
-                  <div class="font-medium">GitHub Connection</div>
-                  <div class="text-sm text-base-content/60">
+                  <div class="font-medium text-gray-900 dark:text-gray-100">GitHub Connection</div>
+                  <div class="text-sm mt-1">
                     {githubConnected ? (
-                      <span class="badge badge-success badge-sm">Connected</span>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">Connected</span>
                     ) : (
-                      <span class="badge badge-error badge-sm">Not Connected</span>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">Not Connected</span>
                     )}
                   </div>
                 </div>
               </div>
               {!githubConnected && (
-                <a href="/api/auth/github-connect" class="btn btn-primary btn-sm">
+                <a href="/api/auth/github-connect" class="btn-primary btn-sm">
                   Connect GitHub
                 </a>
               )}
@@ -123,19 +122,19 @@ const repoUrl = userRepo?.repo_url || null;
             {githubConnected && repoForked && repoUrl && (
               <div class="space-y-3">
                 <!-- Workspace Repository -->
-                <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
+                <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
                   <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-400">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
                     </svg>
                     <div class="flex-1 min-w-0">
-                      <div class="font-medium">Workspace Repository</div>
-                      <div class="text-sm text-base-content/60 truncate">
+                      <div class="font-medium text-gray-900 dark:text-gray-100">Workspace Repository</div>
+                      <div class="text-sm text-gray-600 dark:text-gray-400 truncate">
                         {userRepo?.repo_owner}/{userRepo?.repo_name}
                       </div>
                     </div>
                   </div>
-                  <a href={repoUrl} target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm flex-shrink-0">
+                  <a href={repoUrl} target="_blank" rel="noopener noreferrer" class="btn-ghost btn-sm flex-shrink-0 inline-flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                     </svg>
@@ -144,24 +143,24 @@ const repoUrl = userRepo?.repo_url || null;
                 </div>
 
                 <!-- Branch Status -->
-                <div class="p-4 bg-base-200 rounded-lg">
+                <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
                   <div class="flex items-center gap-2 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-600 dark:text-gray-400">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
                     </svg>
-                    <div class="font-medium">Branch Workflow</div>
+                    <div class="font-medium text-gray-900 dark:text-gray-100">Branch Workflow</div>
                   </div>
-                  <p class="text-sm text-base-content/60">
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
                     Draft branch → Main branch publishing enabled
                   </p>
                 </div>
 
                 <!-- Actions -->
                 <div class="flex gap-2">
-                  <a href="/api/auth/github-connect" class="btn btn-outline btn-sm">
+                  <a href="/api/auth/github-connect" class="btn-secondary btn-sm">
                     Reconnect GitHub
                   </a>
-                  <a href="/onboarding" class="btn btn-ghost btn-sm">
+                  <a href="/onboarding" class="btn-ghost btn-sm">
                     Setup Guide
                   </a>
                 </div>
@@ -169,42 +168,37 @@ const repoUrl = userRepo?.repo_url || null;
             )}
 
             {githubConnected && !repoForked && (
-              <div class="alert alert-warning">
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24">
+              <div class="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="shrink-0 h-5 w-5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                <div>
-                  <div class="font-medium">Workspace Not Initialized</div>
-                  <div class="text-sm">Complete the onboarding to create your workspace repository.</div>
+                <div class="flex-1">
+                  <div class="font-medium text-yellow-900 dark:text-yellow-200">Workspace Not Initialized</div>
+                  <div class="text-sm text-yellow-800 dark:text-yellow-300 mt-1">Complete the onboarding to create your workspace repository.</div>
                 </div>
-                <a href="/onboarding" class="btn btn-sm btn-warning">
+                <a href="/onboarding" class="btn-primary btn-sm flex-shrink-0">
                   Complete Setup
                 </a>
               </div>
             )}
           </div>
-        </div>
       </div>
 
       <!-- Appearance Settings -->
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <h2 class="card-title mb-4">Appearance</h2>
-          <ThemeSettings client:load />
-        </div>
+      <div class="content-section">
+        <h2 class="section-title mb-6">Appearance</h2>
+        <ThemeSettings client:load />
       </div>
 
       <!-- Danger Zone -->
-      <div class="card bg-error/10 border border-error/20">
-        <div class="card-body">
-          <h3 class="card-title text-error">Danger Zone</h3>
-          <p class="text-sm text-base-content/60 mb-4">
-            Irreversible actions that affect your account
-          </p>
-          <button class="btn btn-error btn-outline btn-sm">
-            Delete Account
-          </button>
-        </div>
+      <div class="content-section border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10">
+        <h3 class="section-title text-red-600 dark:text-red-400 mb-2">Danger Zone</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          Irreversible actions that affect your account
+        </p>
+        <button class="px-4 py-2 text-sm font-medium text-red-700 dark:text-red-400 bg-transparent border-2 border-red-300 dark:border-red-700 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+          Delete Account
+        </button>
       </div>
     </div>
   </div>

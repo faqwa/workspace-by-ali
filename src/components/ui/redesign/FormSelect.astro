@@ -1,0 +1,88 @@
+---
+/**
+ * FormSelect Component - Design System
+ *
+ * Select dropdown with label, helper text, and error states
+ * Based on /design folder HTML prototypes
+ */
+
+interface Props {
+  id?: string;
+  name: string;
+  label?: string;
+  value?: string;
+  required?: boolean;
+  disabled?: boolean;
+  error?: string;
+  hint?: string;
+  options?: Array<{ value: string; label: string }>;
+  class?: string;
+}
+
+const {
+  id,
+  name,
+  label,
+  value,
+  required = false,
+  disabled = false,
+  error,
+  hint,
+  options = [],
+  class: className = '',
+} = Astro.props;
+
+const selectId = id || name;
+const hasError = Boolean(error);
+---
+
+<div class="form-control">
+  {label && (
+    <label for={selectId} class="form-label">
+      {label}
+      {required && <span class="text-error ml-1">*</span>}
+      {!required && <span class="form-label-optional">(optional)</span>}
+    </label>
+  )}
+
+  <select
+    id={selectId}
+    name={name}
+    class:list={[
+      'form-select',
+      hasError && 'error',
+      className,
+    ]}
+    required={required}
+    disabled={disabled}
+    {...Astro.props}
+  >
+    {options.length > 0 ? (
+      options.map((option) => (
+        <option value={option.value} selected={value === option.value}>
+          {option.label}
+        </option>
+      ))
+    ) : (
+      <slot />
+    )}
+  </select>
+
+  {hint && !hasError && (
+    <div class="form-hint">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{hint}</span>
+    </div>
+  )}
+
+  {hasError && (
+    <div class="error-message">
+      <svg class="error-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{error}</span>
+    </div>
+  )}
+</div>

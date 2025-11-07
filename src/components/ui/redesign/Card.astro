@@ -1,0 +1,32 @@
+---
+/**
+ * Card Component - Design System
+ *
+ * Base card component with white background, border, and hover effects
+ * Based on /design folder HTML prototypes
+ */
+
+interface Props {
+  class?: string;
+  hover?: boolean;
+}
+
+const {
+  class: className = '',
+  hover = true,
+} = Astro.props;
+
+const classes = [
+  'bg-white dark:bg-gray-900',
+  'border-[1.5px] border-gray-200 dark:border-gray-700',
+  'rounded-lg',
+  'p-6',
+  'transition-all duration-200',
+  hover && 'hover:border-primary hover:shadow-hover hover:-translate-y-0.5',
+  className,
+].filter(Boolean).join(' ');
+---
+
+<div class={classes}>
+  <slot />
+</div>

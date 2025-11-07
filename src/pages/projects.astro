@@ -31,15 +31,15 @@ const privateProjects = (projects || []).filter(p => p.visibility === 'private')
   <!-- Page Header -->
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
     <div>
-      <h1 class="text-3xl font-bold text-base-content mb-2">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
         Projects
       </h1>
-      <p class="text-base-content/60">
+      <p class="text-base text-gray-600 dark:text-gray-400">
         Manage your research projects and workspaces
       </p>
     </div>
 
-    <a href="/projects/new" class="btn bg-personal-primary hover:bg-personal-primary-hover text-white border-0">
+    <a href="/projects/new" class="btn-primary">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
       </svg>
@@ -48,46 +48,110 @@ const privateProjects = (projects || []).filter(p => p.visibility === 'private')
   </div>
 
   <!-- Stats Summary -->
-  <div class="stats shadow mb-8 w-full">
-    <div class="stat">
-      <div class="stat-title">Total Projects</div>
-      <div class="stat-value text-primary">{projects?.length || 0}</div>
-      <div class="stat-desc">Active workspaces</div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+    <div class="stat-card">
+      <div class="stat-label">Total Projects</div>
+      <div class="stat-value">{projects?.length || 0}</div>
+      <div class="stat-description">Active workspaces</div>
     </div>
 
-    <div class="stat">
-      <div class="stat-title">Public</div>
-      <div class="stat-value text-secondary">{publicProjects.length}</div>
-      <div class="stat-desc">Visible to everyone</div>
+    <div class="stat-card">
+      <div class="stat-label">Public</div>
+      <div class="stat-value">{publicProjects.length}</div>
+      <div class="stat-description">Visible to everyone</div>
     </div>
 
-    <div class="stat">
-      <div class="stat-title">Private</div>
-      <div class="stat-value text-accent">{privateProjects.length}</div>
-      <div class="stat-desc">Only you can see</div>
+    <div class="stat-card">
+      <div class="stat-label">Private</div>
+      <div class="stat-value">{privateProjects.length}</div>
+      <div class="stat-description">Only you can see</div>
+    </div>
+  </div>
+
+  <!-- Search & Filters -->
+  <div class="flex flex-col sm:flex-row gap-3 mb-6">
+    <div class="flex-1 relative">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="search-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+      </svg>
+      <input
+        type="text"
+        placeholder="Search projects..."
+        class="search-input"
+        id="projectSearch"
+      />
+    </div>
+    <div class="flex gap-2">
+      <select class="filter-btn" id="categoryFilter">
+        <option value="">All Categories</option>
+        <option value="research">Research</option>
+        <option value="development">Development</option>
+        <option value="design">Design</option>
+        <option value="documentation">Documentation</option>
+        <option value="experiment">Experiment</option>
+      </select>
+      <select class="filter-btn" id="visibilityFilter">
+        <option value="">All Projects</option>
+        <option value="public">Public</option>
+        <option value="private">Private</option>
+      </select>
     </div>
   </div>
 
   <!-- Projects Grid -->
   {projects && projects.length > 0 ? (
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="projectsGrid">
       {projects.map((project) => (
         <ProjectCard client:load project={project} />
       ))}
     </div>
   ) : (
-    <div class="card bg-base-100 shadow">
-      <div class="card-body">
-        <EmptyState
-          client:load
-          title="No projects yet"
-          description="Create your first project to start organizing your research and updates."
-          action={{
-            label: "Create Your First Project",
-            href: "/projects/new"
-          }}
-        />
-      </div>
+    <div class="content-section">
+      <EmptyState
+        client:load
+        title="No projects yet"
+        description="Create your first project to start organizing your research and updates."
+        action={{
+          label: "Create Your First Project",
+          href: "/projects/new"
+        }}
+      />
     </div>
   )}
+
+  <!-- Client-side filtering script -->
+  <script is:inline>
+    if (typeof window !== 'undefined') {
+      const searchInput = document.getElementById('projectSearch');
+      const categoryFilter = document.getElementById('categoryFilter');
+      const visibilityFilter = document.getElementById('visibilityFilter');
+      const projectsGrid = document.getElementById('projectsGrid');
+
+      function filterProjects() {
+        if (!projectsGrid) return;
+
+        const searchTerm = searchInput?.value.toLowerCase() || '';
+        const category = categoryFilter?.value || '';
+        const visibility = visibilityFilter?.value || '';
+
+        const cards = projectsGrid.querySelectorAll('[href^="/projects/"]');
+
+        cards.forEach(card => {
+          const title = card.querySelector('.project-title')?.textContent.toLowerCase() || '';
+          const projectCategory = card.querySelector('.project-tag')?.textContent.toLowerCase() || '';
+          const projectVisibility = card.querySelector('.meta-item')?.textContent.includes('Private') ? 'private' : 'public';
+
+          const matchesSearch = title.includes(searchTerm);
+          const matchesCategory = !category || projectCategory === category;
+          const matchesVisibility = !visibility || projectVisibility === visibility;
+
+          card.style.display = (matchesSearch && matchesCategory && matchesVisibility) ? 'flex' : 'none';
+        });
+      }
+
+      searchInput?.addEventListener('input', filterProjects);
+      categoryFilter?.addEventListener('change', filterProjects);
+      visibilityFilter?.addEventListener('change', filterProjects);
+    }
+  </script>
 </DashboardLayout>

@@ -2,6 +2,7 @@
 
 **Purpose:** Historical session handoffs and outdated planning docs
 **Status:** Reference only - not current
+**Last Updated:** November 7, 2025
 
 ---
 
@@ -12,9 +13,15 @@ This folder contains **historical session handoffs** from the development proces
 **⚠️ DO NOT use these for current development!**
 
 **✅ For current status, see:**
-- [SESSION_HANDOFF_Nov6_2025_Architecture_Refactoring.md](../SESSION_HANDOFF_Nov6_2025_Architecture_Refactoring.md) - Latest handoff
-- [CURRENT_STATE.md](../CURRENT_STATE.md) - Current snapshot
-- [QUICK_START_Nov6_2025.md](../QUICK_START_Nov6_2025.md) - Next session guide
+- [docs/current/](../current/) - Active session documentation
+  - [SESSION_HANDOFF_Nov6_2025_Architecture_Refactoring.md](../current/SESSION_HANDOFF_Nov6_2025_Architecture_Refactoring.md) - Architecture pivot
+  - [SESSION_HANDOFF_Nov7_2025.md](../current/SESSION_HANDOFF_Nov7_2025.md) - Testing & validation (Nov 7)
+  - [REFACTORING_TRACKER.md](../current/REFACTORING_TRACKER.md) - Documentation updates
+  - [TESTING_GUIDE_Nov6.md](../current/TESTING_GUIDE_Nov6.md) - Migration testing
+  - [TESTING_RESULTS_Nov7_2025.md](../current/TESTING_RESULTS_Nov7_2025.md) - Test results (100% success)
+  - [QUICK_START_Nov6_2025.md](../current/QUICK_START_Nov6_2025.md) - Getting started
+- [docs/sprints/SPRINT_HISTORY.md](../sprints/SPRINT_HISTORY.md) - Completed sprint summaries
+- [MASTER_TASKLIST.md](../MASTER_TASKLIST.md) - Current tasks and priorities
 
 ---
 

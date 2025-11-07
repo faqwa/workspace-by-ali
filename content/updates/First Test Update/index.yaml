@@ -1,5 +1,8 @@
+title: First Test Update
 projectSlug: test-project-keystatic
-streamSlug: test-stream
+subProjectSlug: test-sub-project
 date: 2025-11-06
 type: note
-tags: []
+tags:
+  - testing
+  - sample

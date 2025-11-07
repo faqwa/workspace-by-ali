@@ -1,24 +1,24 @@
 /**
- * Tailwind Configuration - Design System from HTML Prototypes
- *
- * Based on designs in /design folder
- * No DaisyUI - Pure custom component system
- *
- * Key Brand Concepts:
- * - Primary: Green #00D084 (Personal workspace growth) 🌱
- * - Secondary: Blue #3B82F6 (Commons workspace trust) 🌳
- * - Accent: Purple #7C3AED (Connection between worlds)
+ * Tailwind Configuration - Based on Improved Designs
+ * 
+ * Extracted from: /design/projects-page-redesign.html
+ *                 /design/create-project-redesign.html
+ * 
+ * Features:
+ * - Green primary brand (#00D084)
+ * - Modern gray scale
+ * - Consistent spacing and sizing
+ * - Smooth transitions
  */
 
 export default {
   content: [
     './src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}',
   ],
-  plugins: [],
   theme: {
     extend: {
       colors: {
-        // Primary Brand - Green (#00D084 from designs)
+        // Primary Brand - Green
         primary: {
           DEFAULT: '#00D084',
           50: '#E6F9F3',
@@ -26,9 +26,9 @@ export default {
           200: '#99F9CF',
           300: '#66F6B7',
           400: '#33F39F',
-          500: '#00D084',  // Main brand color
-          600: '#00A368',  // Hover state
-          700: '#00875A',  // Dark variant
+          500: '#00D084',  // Main
+          600: '#00A368',  // Hover
+          700: '#00875A',  // Dark
           800: '#006A4B',
           900: '#004E39',
         },
@@ -44,20 +44,6 @@ export default {
           700: '#374151',
           800: '#1F2937',
           900: '#111827',
-        },
-        // Personal Workspace (Green - keeping for compatibility)
-        personal: {
-          primary: '#00D084',
-          'primary-hover': '#00A368',
-          light: '#E6F9F3',
-          dark: '#00875A',
-        },
-        // Commons Workspace (Blue)
-        commons: {
-          primary: '#3B82F6',
-          'primary-hover': '#2563eb',
-          light: '#EFF6FF',
-          dark: '#1E40AF',
         },
         // Semantic Colors
         success: '#00D084',
@@ -89,6 +75,7 @@ export default {
         ],
       },
       fontSize: {
+        // From your designs
         'tiny': '11px',
         'xs': '12px',
         'sm': '13px',
@@ -123,6 +110,7 @@ export default {
         'primary': '0 4px 12px rgba(0, 208, 132, 0.3)',
       },
       spacing: {
+        // Your designs use these specific values
         '18': '4.5rem',  // 72px
         '22': '5.5rem',  // 88px
       },
@@ -148,17 +136,13 @@ export default {
           '0%': { transform: 'translateY(0)' },
           '100%': { transform: 'translateY(-2px)' },
         },
-        shimmer: {
-          '0%': { backgroundPosition: '-1000px 0' },
-          '100%': { backgroundPosition: '1000px 0' },
-        },
       },
       animation: {
         'fade-in': 'fade-in 0.3s ease-out',
         'slide-in': 'slide-in 0.3s ease-out',
         'lift': 'lift 0.2s ease-out',
-        'shimmer': 'shimmer 2s infinite linear',
       },
     },
   },
+  plugins: [],
 }

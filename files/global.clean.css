@@ -1,0 +1,455 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Workspace Design System - Clean & Modern
+ * No more conflicting styles, just clean Tailwind patterns
+ */
+
+@layer base {
+  /* CSS Variables for dynamic theming */
+  :root {
+    /* Brand colors (for JS access if needed) */
+    --personal-primary: 34 197 94;  /* rgb(22, 197, 94) - green-500 */
+    --commons-primary: 59 130 246;  /* rgb(59, 130, 246) - blue-500 */
+    --connection: 168 85 247;       /* rgb(168, 85, 247) - purple-500 */
+  }
+
+  /* Base typography */
+  * {
+    @apply border-gray-200;
+  }
+
+  html {
+    @apply antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900;
+    @apply transition-colors duration-200;
+  }
+
+  /* Dark mode support */
+  [data-theme="dark"] {
+    @apply bg-gray-900 text-gray-100;
+  }
+
+  [data-theme="dark"] * {
+    @apply border-gray-700;
+  }
+
+  /* Typography scale */
+  h1 {
+    @apply text-3xl md:text-4xl font-bold text-gray-900;
+    @apply mb-4;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl font-semibold text-gray-900;
+    @apply mb-3;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl font-semibold text-gray-900;
+    @apply mb-2;
+  }
+
+  h4 {
+    @apply text-lg md:text-xl font-medium text-gray-900;
+    @apply mb-2;
+  }
+
+  p {
+    @apply text-gray-700 leading-relaxed;
+    @apply mb-4;
+  }
+
+  [data-theme="dark"] h1,
+  [data-theme="dark"] h2,
+  [data-theme="dark"] h3,
+  [data-theme="dark"] h4 {
+    @apply text-gray-100;
+  }
+
+  [data-theme="dark"] p {
+    @apply text-gray-300;
+  }
+
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-personal-500 ring-offset-2;
+    @apply rounded;
+  }
+}
+
+@layer components {
+  /* ============================================ */
+  /* BUTTON COMPONENTS */
+  /* ============================================ */
+  
+  .btn {
+    @apply inline-flex items-center justify-center;
+    @apply px-4 py-2 rounded-lg;
+    @apply font-medium text-sm;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply hover:shadow-md active:scale-95;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+
+  /* Personal workspace buttons */
+  .btn-personal {
+    @apply bg-personal-500 text-white;
+    @apply hover:bg-personal-600;
+    @apply focus:ring-personal-500;
+  }
+
+  .btn-personal-outline {
+    @apply border-2 border-personal-500 text-personal-600;
+    @apply hover:bg-personal-50;
+    @apply focus:ring-personal-500;
+  }
+
+  .btn-personal-ghost {
+    @apply text-personal-600;
+    @apply hover:bg-personal-50;
+  }
+
+  /* Commons workspace buttons */
+  .btn-commons {
+    @apply bg-commons-500 text-white;
+    @apply hover:bg-commons-600;
+    @apply focus:ring-commons-500;
+  }
+
+  .btn-commons-outline {
+    @apply border-2 border-commons-500 text-commons-600;
+    @apply hover:bg-commons-50;
+    @apply focus:ring-commons-500;
+  }
+
+  .btn-commons-ghost {
+    @apply text-commons-600;
+    @apply hover:bg-commons-50;
+  }
+
+  /* Semantic buttons */
+  .btn-success {
+    @apply bg-green-500 text-white hover:bg-green-600 focus:ring-green-500;
+  }
+
+  .btn-warning {
+    @apply bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-500;
+  }
+
+  .btn-error {
+    @apply bg-red-500 text-white hover:bg-red-600 focus:ring-red-500;
+  }
+
+  .btn-neutral {
+    @apply bg-gray-500 text-white hover:bg-gray-600 focus:ring-gray-500;
+  }
+
+  .btn-ghost {
+    @apply text-gray-700 hover:bg-gray-100 focus:ring-gray-500;
+  }
+
+  /* ============================================ */
+  /* CARD COMPONENTS */
+  /* ============================================ */
+  
+  .card {
+    @apply bg-white rounded-xl;
+    @apply border border-gray-200;
+    @apply shadow-sm hover:shadow-md;
+    @apply transition-shadow duration-200;
+  }
+
+  [data-theme="dark"] .card {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .card-body {
+    @apply p-6;
+  }
+
+  .card-title {
+    @apply text-xl font-semibold text-gray-900 mb-2;
+  }
+
+  [data-theme="dark"] .card-title {
+    @apply text-gray-100;
+  }
+
+  .card-actions {
+    @apply flex gap-2 mt-4 pt-4 border-t border-gray-100;
+  }
+
+  [data-theme="dark"] .card-actions {
+    @apply border-gray-700;
+  }
+
+  /* Card variants */
+  .card-personal {
+    @apply border-personal-200 bg-personal-50;
+  }
+
+  .card-commons {
+    @apply border-commons-200 bg-commons-50;
+  }
+
+  /* ============================================ */
+  /* FORM COMPONENTS */
+  /* ============================================ */
+  
+  .form-control {
+    @apply mb-4;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-gray-700 mb-1.5;
+  }
+
+  [data-theme="dark"] .label {
+    @apply text-gray-300;
+  }
+
+  .input {
+    @apply w-full px-4 py-2 rounded-lg;
+    @apply border border-gray-300;
+    @apply bg-white text-gray-900;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-personal-500 focus:border-transparent;
+    @apply placeholder:text-gray-400;
+  }
+
+  [data-theme="dark"] .input {
+    @apply bg-gray-800 border-gray-600 text-gray-100;
+  }
+
+  .input-sm {
+    @apply px-3 py-1.5 text-sm;
+  }
+
+  .input-lg {
+    @apply px-5 py-3 text-base;
+  }
+
+  .input-error {
+    @apply border-red-500 focus:ring-red-500;
+  }
+
+  .input-success {
+    @apply border-green-500 focus:ring-green-500;
+  }
+
+  .textarea {
+    @apply input min-h-[100px] resize-y;
+  }
+
+  .select {
+    @apply input appearance-none;
+    @apply bg-no-repeat bg-right;
+    background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-position: right 0.75rem center;
+    padding-right: 2.5rem;
+  }
+
+  .checkbox {
+    @apply w-4 h-4 rounded;
+    @apply border-gray-300 text-personal-500;
+    @apply focus:ring-2 focus:ring-personal-500 focus:ring-offset-0;
+    @apply transition-colors duration-200;
+  }
+
+  .toggle {
+    @apply relative inline-flex h-6 w-11 items-center rounded-full;
+    @apply bg-gray-200 transition-colors duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-personal-500 focus:ring-offset-2;
+    @apply cursor-pointer;
+  }
+
+  .toggle:checked {
+    @apply bg-personal-500;
+  }
+
+  .error-message {
+    @apply text-sm text-red-600 mt-1;
+  }
+
+  .helper-text {
+    @apply text-sm text-gray-500 mt-1;
+  }
+
+  /* ============================================ */
+  /* BADGE COMPONENTS */
+  /* ============================================ */
+  
+  .badge {
+    @apply inline-flex items-center;
+    @apply px-2.5 py-0.5 rounded-full;
+    @apply text-xs font-medium;
+  }
+
+  .badge-personal {
+    @apply bg-personal-100 text-personal-800;
+  }
+
+  .badge-commons {
+    @apply bg-commons-100 text-commons-800;
+  }
+
+  .badge-success {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .badge-warning {
+    @apply bg-amber-100 text-amber-800;
+  }
+
+  .badge-error {
+    @apply bg-red-100 text-red-800;
+  }
+
+  .badge-neutral {
+    @apply bg-gray-100 text-gray-800;
+  }
+
+  /* ============================================ */
+  /* ALERT COMPONENTS */
+  /* ============================================ */
+  
+  .alert {
+    @apply p-4 rounded-lg;
+    @apply border;
+  }
+
+  .alert-success {
+    @apply bg-green-50 border-green-200 text-green-800;
+  }
+
+  .alert-warning {
+    @apply bg-amber-50 border-amber-200 text-amber-800;
+  }
+
+  .alert-error {
+    @apply bg-red-50 border-red-200 text-red-800;
+  }
+
+  .alert-info {
+    @apply bg-blue-50 border-blue-200 text-blue-800;
+  }
+
+  /* ============================================ */
+  /* NAVIGATION COMPONENTS */
+  /* ============================================ */
+  
+  .nav-link {
+    @apply flex items-center gap-3;
+    @apply px-4 py-2 rounded-lg;
+    @apply text-gray-700 font-medium;
+    @apply transition-colors duration-200;
+    @apply hover:bg-gray-100;
+  }
+
+  .nav-link-active {
+    @apply bg-personal-100 text-personal-700;
+  }
+
+  [data-theme="dark"] .nav-link {
+    @apply text-gray-300 hover:bg-gray-800;
+  }
+
+  [data-theme="dark"] .nav-link-active {
+    @apply bg-personal-900 text-personal-300;
+  }
+
+  /* ============================================ */
+  /* UTILITY CLASSES */
+  /* ============================================ */
+  
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section {
+    @apply py-12 md:py-16 lg:py-20;
+  }
+
+  .divider {
+    @apply border-t border-gray-200 my-8;
+  }
+
+  [data-theme="dark"] .divider {
+    @apply border-gray-700;
+  }
+
+  .skeleton {
+    @apply bg-gray-200 rounded animate-pulse;
+  }
+
+  [data-theme="dark"] .skeleton {
+    @apply bg-gray-700;
+  }
+
+  .loading-spinner {
+    @apply inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin;
+  }
+}
+
+/* ============================================ */
+/* CUSTOM UTILITIES */
+/* ============================================ */
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .transition-smooth {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    @apply bg-white/80 backdrop-blur-md;
+    @apply border border-white/20;
+  }
+
+  [data-theme="dark"] .glass {
+    @apply bg-gray-900/80;
+    @apply border border-gray-700/20;
+  }
+
+  /* Gradient text */
+  .text-gradient-personal {
+    @apply bg-gradient-to-r from-personal-500 to-personal-700;
+    @apply bg-clip-text text-transparent;
+  }
+
+  .text-gradient-commons {
+    @apply bg-gradient-to-r from-commons-500 to-commons-700;
+    @apply bg-clip-text text-transparent;
+  }
+}
